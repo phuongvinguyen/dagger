@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"      # Specify Gradle as the package ecosystem
+    directory: "/"                  # Root directory of the project
+    schedule:
+      interval: "daily"   
