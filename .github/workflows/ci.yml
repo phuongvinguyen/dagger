@@ -1,5 +1,7 @@
 name: CI
-
+updates:
+    schedule:
+      interval: "daily"
 on:
   push:
     branches:
