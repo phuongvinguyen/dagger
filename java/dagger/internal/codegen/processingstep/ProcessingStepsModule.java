@@ -39,6 +39,7 @@ public interface ProcessingStepsModule {
       MultibindingAnnotationsProcessingStep multibindingAnnotationsProcessingStep,
       BindsInstanceProcessingStep bindsInstanceProcessingStep,
       ModuleProcessingStep moduleProcessingStep,
+      LazyClassKeyProcessingStep lazyClassKeyProcessingStep,
       ComponentProcessingStep componentProcessingStep,
       ComponentHjarProcessingStep componentHjarProcessingStep,
       BindingMethodProcessingStep bindingMethodProcessingStep,
@@ -53,9 +54,8 @@ public interface ProcessingStepsModule {
         multibindingAnnotationsProcessingStep,
         bindsInstanceProcessingStep,
         moduleProcessingStep,
-        compilerOptions.headerCompilation()
-            ? componentHjarProcessingStep
-            : componentProcessingStep,
+        lazyClassKeyProcessingStep,
+        compilerOptions.headerCompilation() ? componentHjarProcessingStep : componentProcessingStep,
         bindingMethodProcessingStep);
   }
 

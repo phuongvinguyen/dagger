@@ -45,7 +45,6 @@ compiler_test(
         "@androidsdk//:platforms/android-32/android.jar",
     ],
     deps = [
-        "//java/dagger/hilt/android:android_entry_point",
         "//java/dagger/hilt/android/testing/compile",
         "//java/dagger/internal/codegen/xprocessing",
         "//java/dagger/internal/codegen/xprocessing:xprocessing-testing",

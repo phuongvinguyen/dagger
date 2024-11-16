@@ -59,9 +59,7 @@ public final class SingleCheck<T extends @Nullable Object> implements Provider<T
   }
 
   /** Returns a {@link Provider} that caches the value from the given delegate provider. */
-  // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> provider)"
-  // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
-  public static <P extends Provider<T>, T> Provider<T> provider(P provider) {
+  public static <T> Provider<T> provider(Provider<T> provider) {
     // If a scoped @Binds delegates to a scoped binding, don't cache the value again.
     if (provider instanceof SingleCheck || provider instanceof DoubleCheck) {
       return provider;

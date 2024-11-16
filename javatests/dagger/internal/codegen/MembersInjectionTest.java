@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen;
 
+import androidx.room.compiler.processing.XProcessingEnv;
 import androidx.room.compiler.processing.util.Source;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +33,23 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class MembersInjectionTest {
+
+  private static final Source TYPE_USE_NULLABLE =
+      CompilerTests.javaSource(
+          "test.Nullable", // force one-string-per-line format
+          "package test;",
+          "import static java.lang.annotation.ElementType.TYPE_USE;",
+          "import java.lang.annotation.Target;",
+          "",
+          "@Target(TYPE_USE)",
+          "public @interface Nullable {}");
+  private static final Source NON_TYPE_USE_NULLABLE =
+      CompilerTests.javaSource(
+          "test.Nullable", // force one-string-per-line format
+          "package test;",
+          "",
+          "public @interface Nullable {}");
+
   @Parameters(name = "{0}")
   public static ImmutableList<Object[]> parameters() {
     return CompilerMode.TEST_PARAMETERS;
@@ -319,6 +337,54 @@ public class MembersInjectionTest {
             "  @Inject Provider<String> stringProvider;",
             "}");
     CompilerTests.daggerCompiler(file)
+        .withProcessingOptions(compilerMode.processorOptions())
+        .compile(
+            subject -> {
+              subject.hasErrorCount(0);
+              subject.generatedSource(
+                  goldenFileRule.goldenSource("test/FieldInjection_MembersInjector"));
+            });
+  }
+
+  @Test
+  public void typeUseNullableFieldInjection() {
+    Source file =
+        CompilerTests.javaSource(
+            "test.FieldInjection",
+            "package test;",
+            "",
+            "import dagger.Lazy;",
+            "import javax.inject.Inject;",
+            "import javax.inject.Provider;",
+            "",
+            "class FieldInjection {",
+            "  @Inject @Nullable String string;",
+            "}");
+    CompilerTests.daggerCompiler(file, TYPE_USE_NULLABLE)
+        .withProcessingOptions(compilerMode.processorOptions())
+        .compile(
+            subject -> {
+              subject.hasErrorCount(0);
+              subject.generatedSource(
+                  goldenFileRule.goldenSource("test/FieldInjection_MembersInjector"));
+            });
+  }
+
+  @Test
+  public void nonTypeUseNullableFieldInjection() {
+    Source file =
+        CompilerTests.javaSource(
+            "test.FieldInjection",
+            "package test;",
+            "",
+            "import dagger.Lazy;",
+            "import javax.inject.Inject;",
+            "import javax.inject.Provider;",
+            "",
+            "class FieldInjection {",
+            "  @Inject @Nullable String string;",
+            "}");
+    CompilerTests.daggerCompiler(file, NON_TYPE_USE_NULLABLE)
         .withProcessingOptions(compilerMode.processorOptions())
         .compile(
             subject -> {
@@ -1270,5 +1336,40 @@ public class MembersInjectionTest {
               subject.hasErrorCount(0);
               subject.generatedSource(goldenFileRule.goldenSource("test/DaggerMyComponent"));
             });
+  }
+
+  @Test
+  public void kotlinNullableFieldInjection() {
+    Source file =
+        CompilerTests.kotlinSource(
+            "MyClass.kt",
+            "package test;",
+            "",
+            "import javax.inject.Inject;",
+            "",
+            "class MyClass @Inject constructor() {",
+            "  @JvmField @Inject var nullableString: String? = null",
+            "  @JvmField @Inject var nullableObject: Any? = null",
+            "}");
+    CompilerTests.daggerCompiler(file)
+        .withProcessingOptions(compilerMode.processorOptions())
+        .compile(
+            subject -> {
+              subject.hasErrorCount(0);
+              Source expectedSource = goldenFileRule.goldenSource("test/MyClass_MembersInjector");
+              subject.generatedSource(
+                  CompilerTests.backend(subject) == XProcessingEnv.Backend.KSP
+                      ? stripJetbrainsNullable(expectedSource)
+                      : expectedSource);
+            });
+  }
+
+  private Source stripJetbrainsNullable(Source source) {
+    return CompilerTests.javaSource(
+        ((Source.JavaSource) source).getQName(),
+        source
+            .getContents()
+            .replace("@Nullable ", "")
+            .replace("import org.jetbrains.annotations.Nullable;\n", ""));
   }
 }

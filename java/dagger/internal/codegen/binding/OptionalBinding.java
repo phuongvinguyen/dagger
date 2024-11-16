@@ -23,6 +23,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.model.BindingKind;
 import dagger.internal.codegen.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.Nullability;
 import java.util.Optional;
 
 /** A binding for a {@link BindingKind#OPTIONAL}. */
@@ -80,6 +81,6 @@ public abstract class OptionalBinding extends ContributionBinding {
   abstract static class Builder extends ContributionBinding.Builder<OptionalBinding, Builder> {
     abstract Builder delegateRequest(DependencyRequest delegateRequest);
 
-    abstract Builder bindingType(BindingType bindingType);
+    abstract Builder optionalBindingType(Optional<BindingType> optionalBindingType);
   }
 }

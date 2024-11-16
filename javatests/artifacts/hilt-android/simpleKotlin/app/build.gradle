@@ -22,7 +22,7 @@ apply plugin: 'com.google.devtools.ksp'
 
 android {
     compileSdkVersion 33
-    buildToolsVersion "33.0.0"
+    buildToolsVersion "33.0.1"
 
     defaultConfig {
         applicationId "dagger.hilt.android.simpleKotlin"
@@ -32,6 +32,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "dagger.hilt.android.example.gradle.simpleKotlin.TestRunner"
     }
+    namespace "dagger.hilt.android.simpleKotlin"
     buildTypes {
         release {
             minifyEnabled true

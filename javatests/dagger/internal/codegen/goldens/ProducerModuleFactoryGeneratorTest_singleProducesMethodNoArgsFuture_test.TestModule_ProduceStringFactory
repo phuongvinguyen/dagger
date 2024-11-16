@@ -3,12 +3,13 @@ package test;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import dagger.internal.DaggerGenerated;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.producers.internal.AbstractProducesMethodProducer;
 import dagger.producers.monitoring.ProducerToken;
 import dagger.producers.monitoring.ProductionComponentMonitor;
 import java.util.concurrent.Executor;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @DaggerGenerated
 @Generated(
@@ -22,7 +23,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class TestModule_ProduceStringFactory extends AbstractProducesMethodProducer<Void, String> {
   private final TestModule module;
@@ -37,6 +39,12 @@ public final class TestModule_ProduceStringFactory extends AbstractProducesMetho
       Provider<Executor> executorProvider,
       Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {
     return new TestModule_ProduceStringFactory(module, executorProvider, productionComponentMonitorProvider);
+  }
+
+  public static TestModule_ProduceStringFactory create(TestModule module,
+      javax.inject.Provider<Executor> executorProvider,
+      javax.inject.Provider<ProductionComponentMonitor> productionComponentMonitorProvider) {
+    return new TestModule_ProduceStringFactory(module, Providers.asDaggerProvider(executorProvider), Providers.asDaggerProvider(productionComponentMonitorProvider));
   }
 
   @Override

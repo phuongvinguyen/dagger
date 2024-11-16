@@ -23,6 +23,8 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.model.BindingKind;
 import dagger.internal.codegen.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.Nullability;
+import java.util.Optional;
 
 /** A binding for a {@link BindingKind#DELEGATE}. */
 @CheckReturnValue
@@ -67,7 +69,7 @@ public abstract class DelegateBinding extends ContributionBinding {
   abstract static class Builder extends ContributionBinding.Builder<DelegateBinding, Builder> {
     abstract Builder delegateRequest(DependencyRequest delegateRequest);
 
-    abstract Builder bindingType(BindingType bindingType);
+    abstract Builder optionalBindingType(Optional<BindingType> bindingType);
 
     abstract Builder contributionType(ContributionType contributionType);
 

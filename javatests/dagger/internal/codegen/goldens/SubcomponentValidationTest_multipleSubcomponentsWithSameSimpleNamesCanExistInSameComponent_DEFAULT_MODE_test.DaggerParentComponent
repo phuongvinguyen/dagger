@@ -15,7 +15,8 @@ import test.subpackage.Sub;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerParentComponent {
   private DaggerParentComponent() {

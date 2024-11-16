@@ -17,7 +17,8 @@ import other.FooImpl_Factory;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {

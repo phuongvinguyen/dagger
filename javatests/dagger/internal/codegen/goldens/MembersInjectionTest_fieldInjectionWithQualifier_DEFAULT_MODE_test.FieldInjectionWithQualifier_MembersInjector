@@ -3,10 +3,11 @@ package test;
 import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.InjectedFieldSignature;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import javax.annotation.processing.Generated;
 import javax.inject.Named;
-import javax.inject.Provider;
 
 @QualifierMetadata("javax.inject.Named")
 @DaggerGenerated
@@ -20,7 +21,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class FieldInjectionWithQualifier_MembersInjector implements MembersInjector<FieldInjectionWithQualifier> {
   private final Provider<String> aProvider;
@@ -36,6 +38,11 @@ public final class FieldInjectionWithQualifier_MembersInjector implements Member
   public static MembersInjector<FieldInjectionWithQualifier> create(Provider<String> aProvider,
       Provider<String> bProvider) {
     return new FieldInjectionWithQualifier_MembersInjector(aProvider, bProvider);
+  }
+
+  public static MembersInjector<FieldInjectionWithQualifier> create(
+      javax.inject.Provider<String> aProvider, javax.inject.Provider<String> bProvider) {
+    return new FieldInjectionWithQualifier_MembersInjector(Providers.asDaggerProvider(aProvider), Providers.asDaggerProvider(bProvider));
   }
 
   @Override

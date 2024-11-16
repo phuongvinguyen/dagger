@@ -21,11 +21,10 @@ import static dagger.internal.codegen.base.Scopes.getReadableSource;
 import static dagger.internal.codegen.model.BindingKind.INJECTION;
 import static dagger.internal.codegen.xprocessing.XElements.asExecutable;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.Multimaps;
 import dagger.internal.codegen.base.Scopes;
 import dagger.internal.codegen.binding.MethodSignatureFormatter;
 import dagger.internal.codegen.compileroption.CompilerOptions;
@@ -35,8 +34,8 @@ import dagger.internal.codegen.model.BindingGraph.ComponentNode;
 import dagger.internal.codegen.model.DiagnosticReporter;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
 import dagger.internal.codegen.validation.ValidationBindingGraphPlugin;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.tools.Diagnostic;
 
@@ -45,7 +44,6 @@ import javax.tools.Diagnostic;
  * component.
  */
 final class IncompatiblyScopedBindingsValidator extends ValidationBindingGraphPlugin {
-
   private final MethodSignatureFormatter methodSignatureFormatter;
   private final CompilerOptions compilerOptions;
   private final DiagnosticMessageGenerator.Factory diagnosticMessageGeneratorFactory;
@@ -69,36 +67,36 @@ final class IncompatiblyScopedBindingsValidator extends ValidationBindingGraphPl
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
     DiagnosticMessageGenerator diagnosticMessageGenerator =
         diagnosticMessageGeneratorFactory.create(bindingGraph);
-    ImmutableSetMultimap.Builder<ComponentNode, dagger.internal.codegen.model.Binding>
-        incompatibleBindings = ImmutableSetMultimap.builder();
-    for (dagger.internal.codegen.model.Binding binding : bindingGraph.bindings()) {
-      binding
-          .scope()
-          .filter(scope -> !scope.isReusable())
-          .ifPresent(
-              scope -> {
-                ComponentNode componentNode =
-                    bindingGraph.componentNode(binding.componentPath()).get();
-                if (!componentNode.scopes().contains(scope)) {
-                  // @Inject bindings in module or subcomponent binding graphs will appear at the
-                  // properly scoped ancestor component, so ignore them here.
-                  if (binding.kind().equals(INJECTION)
-                      && (bindingGraph.rootComponentNode().isSubcomponent()
-                          || !bindingGraph.rootComponentNode().isRealComponent())) {
-                    return;
-                  }
-                  incompatibleBindings.put(componentNode, binding);
-                }
-              });
+    bindingGraph.bindings().stream()
+        .filter(binding -> hasIncompatibleScope(bindingGraph, binding))
+        .collect(groupingBy(binding -> owningComponent(bindingGraph, binding)))
+        .forEach((owningComponent, bindings) ->
+            report(owningComponent, bindings, diagnosticReporter, diagnosticMessageGenerator));
+  }
+
+  private static boolean hasIncompatibleScope(BindingGraph bindingGraph, Binding binding) {
+    if (binding.scope().isEmpty()
+            || binding.scope().get().isReusable()
+            // @Inject bindings in module or subcomponent binding graphs will appear at the
+            // properly scoped ancestor component, so ignore them here.
+            || (binding.kind() == INJECTION && isSubcomponentOrModuleRoot(bindingGraph))) {
+      return false;
     }
-    Multimaps.asMap(incompatibleBindings.build())
-        .forEach((componentNode, bindings) ->
-            report(componentNode, bindings, diagnosticReporter, diagnosticMessageGenerator));
+    return !owningComponent(bindingGraph, binding).scopes().contains(binding.scope().get());
+  }
+
+  private static boolean isSubcomponentOrModuleRoot(BindingGraph bindingGraph) {
+    ComponentNode rootComponent = bindingGraph.rootComponentNode();
+     return rootComponent.isSubcomponent() || !rootComponent.isRealComponent();
+  }
+
+  private static ComponentNode owningComponent(BindingGraph bindingGraph, Binding binding) {
+    return bindingGraph.componentNode(binding.componentPath()).get();
   }
 
   private void report(
       ComponentNode componentNode,
-      Set<Binding> bindings,
+      List<Binding> bindings,
       DiagnosticReporter diagnosticReporter,
       DiagnosticMessageGenerator diagnosticMessageGenerator) {
     Diagnostic.Kind diagnosticKind = ERROR;

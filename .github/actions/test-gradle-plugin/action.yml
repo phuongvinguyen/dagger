@@ -5,14 +5,14 @@ runs:
   using: "composite"
   steps:
     - name: 'Install Java ${{ env.USE_JAVA_VERSION_FOR_PLUGIN }}'
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: '${{ env.USE_JAVA_DISTRIBUTION }}'
         java-version: '${{ env.USE_JAVA_VERSION_FOR_PLUGIN }}'
     - name: 'Check out repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: 'Cache local Maven repository'
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.m2/repository
@@ -21,14 +21,14 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
     - name: 'Cache Bazel files'
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/bazel
         key: ${{ runner.os }}-bazel-build-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-bazel-build-
     - name: 'Cache Gradle files'
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -37,7 +37,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: 'Download local snapshot for tests'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: local-snapshot
         path: ~/.m2/repository/com/google/dagger

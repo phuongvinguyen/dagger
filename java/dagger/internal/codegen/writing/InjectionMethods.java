@@ -72,13 +72,13 @@ import dagger.internal.codegen.binding.AssistedInjectionBinding;
 import dagger.internal.codegen.binding.ContributionBinding;
 import dagger.internal.codegen.binding.InjectionBinding;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
-import dagger.internal.codegen.binding.Nullability;
 import dagger.internal.codegen.binding.ProvisionBinding;
 import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.extension.DaggerCollectors;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.DaggerAnnotation;
 import dagger.internal.codegen.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.Nullability;
 import dagger.internal.codegen.xprocessing.XAnnotations;
 import java.util.List;
 import java.util.Optional;
@@ -472,15 +472,29 @@ final class InjectionMethods {
                           ? asMethodParameter(parameter).getJvmName()
                           : getSimpleName(parameter));
               boolean useObject = !isRawTypePubliclyAccessible(parameter.getType());
-              return copyParameter(methodBuilder, parameter.getType(), name, useObject);
+              return copyParameter(
+                  methodBuilder, parameter.getType(), name, useObject, Nullability.of(parameter));
             })
         .collect(toParametersCodeBlock());
   }
 
   private static CodeBlock copyParameter(
-      MethodSpec.Builder methodBuilder, XType type, String name, boolean useObject) {
+      MethodSpec.Builder methodBuilder,
+      XType type,
+      String name,
+      boolean useObject,
+      Nullability nullability) {
     TypeName typeName = useObject ? TypeName.OBJECT : type.getTypeName();
-    methodBuilder.addParameter(ParameterSpec.builder(typeName, name).build());
+    nullability.typeUseNullableAnnotations().stream()
+        .map(it -> AnnotationSpec.builder(it).build())
+        .forEach(typeName::annotated);
+    methodBuilder.addParameter(
+        ParameterSpec.builder(typeName, name)
+            .addAnnotations(
+                nullability.nonTypeUseNullableAnnotations().stream()
+                    .map(it -> AnnotationSpec.builder(it).build())
+                    .collect(toImmutableList()))
+            .build());
     return useObject ? CodeBlock.of("($T) $L", type.getTypeName(), name) : CodeBlock.of("$L", name);
   }
 
@@ -490,7 +504,12 @@ final class InjectionMethods {
       XType type,
       boolean useObject) {
     CodeBlock instance =
-        copyParameter(methodBuilder, type, parameterNameSet.getUniqueName("instance"), useObject);
+        copyParameter(
+            methodBuilder,
+            type,
+            parameterNameSet.getUniqueName("instance"),
+            useObject,
+            Nullability.NOT_NULLABLE);
     // If we had to cast the instance add an extra parenthesis incase we're calling a method on it.
     return useObject ? CodeBlock.of("($L)", instance) : instance;
   }

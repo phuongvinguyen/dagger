@@ -25,5 +25,6 @@ import dagger.hilt.android.components.FragmentComponent;
 @DefineComponent.Builder
 public interface FragmentComponentBuilder {
   FragmentComponentBuilder fragment(@BindsInstance Fragment fragment);
+
   FragmentComponent build();
 }

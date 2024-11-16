@@ -15,6 +15,8 @@
 # Description:
 #   A processor for @dagger.hilt.android.testing.CustomTestApplication.
 
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
 package(default_visibility = ["//:src"])
 
 java_plugin(

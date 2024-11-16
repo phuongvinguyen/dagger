@@ -30,7 +30,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    namespace "dagger.lazyclasskey"
     buildTypes {
         debug {
             minifyEnabled true

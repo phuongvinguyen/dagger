@@ -3,11 +3,12 @@ package test;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata
@@ -22,7 +23,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class ParentModule_ProvideListBFactory<A extends CharSequence, B, C extends Number & Comparable<C>> implements Factory<List<B>> {
   private final ParentModule<A, B, C> module;
@@ -37,6 +39,11 @@ public final class ParentModule_ProvideListBFactory<A extends CharSequence, B, C
   @Override
   public List<B> get() {
     return provideListB(module, bProvider.get());
+  }
+
+  public static <A extends CharSequence, B, C extends Number & Comparable<C>> ParentModule_ProvideListBFactory<A, B, C> create(
+      ParentModule<A, B, C> module, javax.inject.Provider<B> bProvider) {
+    return new ParentModule_ProvideListBFactory<A, B, C>(module, Providers.asDaggerProvider(bProvider));
   }
 
   public static <A extends CharSequence, B, C extends Number & Comparable<C>> ParentModule_ProvideListBFactory<A, B, C> create(

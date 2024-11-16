@@ -17,7 +17,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {
@@ -92,13 +93,13 @@ final class DaggerTestComponent {
       @Override
       public T get() {
         switch (id) {
-          case 0: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong3 
+          case 0: // java.util.Map<java.lang.Long,java.lang.Long> test.SubcomponentMapModule#provideLong3 
           return (T) (Long) SubcomponentMapModule.provideLong3();
 
-          case 1: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong4 
+          case 1: // java.util.Map<java.lang.Long,java.lang.Long> test.SubcomponentMapModule#provideLong4 
           return (T) (Long) SubcomponentMapModule.provideLong4();
 
-          case 2: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.SubcomponentMapModule#provideLong5 
+          case 2: // java.util.Map<java.lang.Long,java.lang.Long> test.SubcomponentMapModule#provideLong5 
           return (T) (Long) SubcomponentMapModule.provideLong5();
 
           default: throw new AssertionError(id);
@@ -181,16 +182,16 @@ final class DaggerTestComponent {
       @Override
       public T get() {
         switch (id) {
-          case 0: // java.util.Map<java.lang.Integer,javax.inject.Provider<java.lang.Integer>> test.MapModule#provideInt 
+          case 0: // java.util.Map<java.lang.Integer,java.lang.Integer> test.MapModule#provideInt 
           return (T) (Integer) MapModule.provideInt();
 
-          case 1: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.MapModule#provideLong0 
+          case 1: // java.util.Map<java.lang.Long,java.lang.Long> test.MapModule#provideLong0 
           return (T) (Long) MapModule.provideLong0();
 
-          case 2: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.MapModule#provideLong1 
+          case 2: // java.util.Map<java.lang.Long,java.lang.Long> test.MapModule#provideLong1 
           return (T) (Long) MapModule.provideLong1();
 
-          case 3: // java.util.Map<java.lang.Long,javax.inject.Provider<java.lang.Long>> test.MapModule#provideLong2 
+          case 3: // java.util.Map<java.lang.Long,java.lang.Long> test.MapModule#provideLong2 
           return (T) (Long) MapModule.provideLong2();
 
           default: throw new AssertionError(id);

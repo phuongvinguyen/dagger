@@ -16,11 +16,14 @@
 
 package dagger.internal.codegen.xprocessing;
 
+import static dagger.internal.codegen.extension.DaggerStreams.toImmutableSet;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
 
 import androidx.room.compiler.processing.XExecutableParameterElement;
 import androidx.room.compiler.processing.XType;
 import androidx.room.compiler.processing.XTypeElement;
+import com.google.common.collect.ImmutableSet;
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
@@ -51,6 +54,24 @@ public final class JavaPoetExt {
 
   public static ParameterSpec toParameterSpec(XExecutableParameterElement param) {
     return ParameterSpec.builder(param.getType().getTypeName(), param.getJvmName()).build();
+  }
+
+  public static ParameterSpec toParameterSpec(
+      XExecutableParameterElement parameter, XType parameterType) {
+    Nullability nullability = Nullability.of(parameter);
+    ImmutableSet<AnnotationSpec> typeUseNullableAnnotations =
+        nullability.typeUseNullableAnnotations().stream()
+            .map(annotation -> AnnotationSpec.builder(annotation).build())
+            .collect(toImmutableSet());
+    ImmutableSet<AnnotationSpec> nonTypeUseNullableAnnotations =
+        nullability.nonTypeUseNullableAnnotations().stream()
+            .map(annotation -> AnnotationSpec.builder(annotation).build())
+            .collect(toImmutableSet());
+    return ParameterSpec.builder(
+            parameterType.getTypeName().annotated(typeUseNullableAnnotations.asList()),
+            parameter.getJvmName())
+        .addAnnotations(nonTypeUseNullableAnnotations)
+        .build();
   }
 
   private JavaPoetExt() {}

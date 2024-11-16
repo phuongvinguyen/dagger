@@ -39,6 +39,9 @@ import static dagger.internal.codegen.javapoet.TypeNames.isFutureType;
 import static dagger.internal.codegen.javapoet.TypeNames.listOf;
 import static dagger.internal.codegen.javapoet.TypeNames.listenableFutureOf;
 import static dagger.internal.codegen.javapoet.TypeNames.producedOf;
+import static dagger.internal.codegen.writing.FactoryGenerator.hasDaggerProviderParams;
+import static dagger.internal.codegen.writing.FactoryGenerator.remapParamsToJavaxProvider;
+import static dagger.internal.codegen.writing.FactoryGenerator.wrappedParametersCodeBlock;
 import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.getSimpleName;
@@ -76,6 +79,7 @@ import dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.DependencyRequest;
 import dagger.internal.codegen.model.RequestKind;
+import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
 
@@ -125,7 +129,7 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
                     .filter(field -> !field.equals(factoryFields.monitorField))
                     .collect(toImmutableList()))
             .addMethod(constructorMethod(binding, factoryFields))
-            .addMethod(staticCreateMethod(binding, factoryFields))
+            .addMethods(staticCreateMethod(binding, factoryFields))
             .addMethod(collectDependenciesMethod(binding, factoryFields))
             .addMethod(callProducesMethod(binding, factoryFields));
 
@@ -185,17 +189,42 @@ public final class ProducerFactoryGenerator extends SourceFileGenerator<Producti
   //   return new FooModule_ProducesFooFactory(
   //       module, executorProvider, productionComponentMonitorProvider, fooProducer, barProducer);
   // }
-  private MethodSpec staticCreateMethod(ProductionBinding binding, FactoryFields factoryFields) {
-    MethodSpec constructor = constructorMethod(binding, factoryFields);
+  private ImmutableList<MethodSpec> staticCreateMethod(
+      ProductionBinding binding, FactoryFields factoryFields) {
+    ImmutableList.Builder<MethodSpec> methodsBuilder = ImmutableList.builder();
+    List<ParameterSpec> params = constructorMethod(binding, factoryFields).parameters;
+    methodsBuilder.add(MethodSpec.methodBuilder("create")
+        .addModifiers(PUBLIC, STATIC)
+        .returns(parameterizedGeneratedTypeNameForBinding(binding))
+        .addTypeVariables(bindingTypeElementTypeVariableNames(binding))
+        .addParameters(params)
+        .addStatement(
+            "return new $T($L)",
+            parameterizedGeneratedTypeNameForBinding(binding),
+            parameterNames(params))
+        .build());
+    // If any of the parameters take a Dagger Provider type, we also need to make a
+    // Javax Provider type for backwards compatibility with components generated at
+    // an older version.
+    // Eventually, we will need to remove this and break backwards compatibility
+    // in order to fully cut the Javax dependency.
+    if (hasDaggerProviderParams(params)) {
+      methodsBuilder.add(javaxCreateMethod(binding, params));
+    }
+    return methodsBuilder.build();
+  }
+
+  private MethodSpec javaxCreateMethod(ProductionBinding binding, List<ParameterSpec> params) {
+    ImmutableList<ParameterSpec> remappedParams = remapParamsToJavaxProvider(params);
     return MethodSpec.methodBuilder("create")
         .addModifiers(PUBLIC, STATIC)
         .returns(parameterizedGeneratedTypeNameForBinding(binding))
         .addTypeVariables(bindingTypeElementTypeVariableNames(binding))
-        .addParameters(constructor.parameters)
+        .addParameters(remappedParams)
         .addStatement(
             "return new $T($L)",
             parameterizedGeneratedTypeNameForBinding(binding),
-            parameterNames(constructor.parameters))
+            wrappedParametersCodeBlock(remappedParams))
         .build();
   }
 

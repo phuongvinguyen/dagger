@@ -124,8 +124,17 @@ public class DaggerSuperficialValidationTest {
               assertThrows(
                   ValidationException.KnownErrorType.class,
                   () -> superficialValidation.validateElement(testClassElement));
-          // TODO(b/248552462): Javac and KSP should match once this bug is fixed.
-          boolean isJavac = processingEnv.getBackend() == XProcessingEnv.Backend.JAVAC;
+          final String errorType;
+          if (processingEnv.getBackend() == XProcessingEnv.Backend.JAVAC) {
+            // JDK 24 improves error type information.
+            errorType =
+                Runtime.version().feature() >= 24
+                    ? isKAPT(processingEnv) ? "MissingType" : "MissingType<?>"
+                    : "<any>";
+          } else {
+            // TODO(b/248552462): Javac and KSP should match once this bug is fixed.
+            errorType = "error.NonExistentClass";
+          }
           assertThat(exception)
               .hasMessageThat()
               .contains(
@@ -135,7 +144,7 @@ public class DaggerSuperficialValidationTest {
                           "  => element (CLASS): test.TestClass",
                           "  => element (METHOD): blah()",
                           "  => type (ERROR return type): %1$s"),
-                      isJavac ? "<any>" : "error.NonExistentClass"));
+                      errorType));
         });
   }
 
@@ -165,8 +174,14 @@ public class DaggerSuperficialValidationTest {
               assertThrows(
                   ValidationException.KnownErrorType.class,
                   () -> superficialValidation.validateElement(testClassElement));
-          // TODO(b/248552462): Javac and KSP should match once this bug is fixed.
-          boolean isJavac = processingEnv.getBackend() == XProcessingEnv.Backend.JAVAC;
+          final String errorType;
+          if (processingEnv.getBackend() == XProcessingEnv.Backend.JAVAC) {
+            // JDK 24 improves error type information.
+            errorType = Runtime.version().feature() >= 24 ? "MissingType<?>" : "<any>";
+          } else {
+            // TODO(b/248552462): Javac and KSP should match once this bug is fixed.
+            errorType = "error.NonExistentClass";
+          }
           assertThat(exception)
               .hasMessageThat()
               .contains(
@@ -178,7 +193,7 @@ public class DaggerSuperficialValidationTest {
                           "  => type (DECLARED return type): "
                               + "java.util.Map<java.util.Set<?>,%1$s>",
                           "  => type (ERROR type argument): %1$s"),
-                      isJavac ? "<any>" : "error.NonExistentClass"));
+                      errorType));
         });
   }
 
@@ -197,7 +212,7 @@ public class DaggerSuperficialValidationTest {
             "class TestClass<T : MissingType>"),
         (processingEnv, superficialValidation) -> {
           if (isKAPT(processingEnv)) {
-            // TODO(b/268536260): Figure out why XProcessing Testing infra fails when using KAPT.
+            // The KAPT java stub doesn't reference the MissingType symbol (b/268536260#comment2).
             return;
           }
           XTypeElement testClassElement = processingEnv.findTypeElement("test.TestClass");
@@ -402,7 +417,7 @@ public class DaggerSuperficialValidationTest {
             "class TestClass<T> where T: Number, T: Missing"),
         (processingEnv, superficialValidation) -> {
           if (isKAPT(processingEnv)) {
-            // TODO(b/268536260): Figure out why XProcessing Testing infra fails when using KAPT.
+            // The KAPT java stub doesn't reference the MissingType symbol (b/268536260#comment2).
             return;
           }
           XTypeElement testClassElement = processingEnv.findTypeElement("test.TestClass");
@@ -454,13 +469,6 @@ public class DaggerSuperficialValidationTest {
             "}"),
         (processingEnv, superficialValidation) -> {
           XTypeElement testClassElement = processingEnv.findTypeElement("test.Outer.TestClass");
-          if (processingEnv.getBackend() == XProcessingEnv.Backend.KSP
-              && sourceKind == SourceKind.KOTLIN) {
-            // TODO(b/269364338): When using kotlin source with KSP the MissingType annotation value
-            // appears to be missing so validating this element does not cause the expected failure.
-            superficialValidation.validateElement(testClassElement);
-            return;
-          }
           ValidationException exception =
               assertThrows(
                   ValidationException.KnownErrorType.class,
@@ -512,10 +520,8 @@ public class DaggerSuperficialValidationTest {
             "  )",
             "}"),
         (processingEnv, superficialValidation) -> {
-          if (sourceKind == SourceKind.KOTLIN) {
-            // TODO(b/268536260): Figure out why XProcessing Testing infra fails when using KAPT.
-            // TODO(b/269364338): When using kotlin source the MissingType annotation value appears
-            // to be missing so validating this element does not cause the expected failure.
+          if (isKAPT(processingEnv)) {
+            // The KAPT java stub doesn't reference the MissingType symbol (b/268536260#comment2).
             return;
           }
           XTypeElement testClassElement = processingEnv.findTypeElement("test.Outer.TestClass");

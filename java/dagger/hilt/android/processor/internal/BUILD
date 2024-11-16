@@ -15,6 +15,8 @@
 # Description:
 #   Internal code for implementing Hilt android processors.
 
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(default_visibility = ["//:src"])
 
 java_library(

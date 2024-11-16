@@ -2,7 +2,6 @@ package test;
 
 import com.google.common.collect.ImmutableMap;
 import dagger.internal.DaggerGenerated;
-import dagger.internal.IdentifierNameString;
 import dagger.internal.LazyClassKeyMap;
 import dagger.internal.MapFactory;
 import dagger.internal.Provider;
@@ -11,6 +10,7 @@ import javax.annotation.processing.Generated;
 import mapkeys.MapKeys;
 import mapkeys.MapModule;
 import mapkeys.MapModule_ClassKeyFactory;
+import mapkeys.MapModule_ClassKey_LazyMapKey;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueFactory;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleArrayValueFactory;
@@ -29,7 +29,8 @@ import mapkeys.MapModule_ComplexKeyWithInaccessibleValueMapKey;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {
@@ -67,13 +68,13 @@ final class DaggerTestComponent {
 
     @SuppressWarnings("unchecked")
     private void initialize() {
-      this.mapOfClassOfAndIntegerProvider = LazyClassKeyMap.MapFactory.<Integer>of(MapFactory.<String, Integer>builder(1).put(LazyClassKeyProvider.mapkeys_MapKeys_Inaccessible, MapModule_ClassKeyFactory.create()).build());
+      this.mapOfClassOfAndIntegerProvider = LazyClassKeyMap.MapFactory.<Integer>of(MapFactory.<String, Integer>builder(1).put(MapModule_ClassKey_LazyMapKey.lazyClassKeyName, MapModule_ClassKeyFactory.create()).build());
       this.mapOfComplexKeyAndIntegerProvider = MapFactory.<MapKeys.ComplexKey, Integer>builder(3).put(MapModule_ComplexKeyWithInaccessibleValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleValueFactory.create()).put(MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleArrayValueFactory.create()).put(MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(), MapModule_ComplexKeyWithInaccessibleAnnotationValueFactory.create()).build();
     }
 
     @Override
     public Map<Class<?>, Integer> classKey() {
-      return LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(LazyClassKeyProvider.mapkeys_MapKeys_Inaccessible, MapModule.classKey()));
+      return LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(MapModule_ClassKey_LazyMapKey.lazyClassKeyName, MapModule.classKey()));
     }
 
     @Override
@@ -89,11 +90,6 @@ final class DaggerTestComponent {
     @Override
     public javax.inject.Provider<Map<MapKeys.ComplexKey, Integer>> complexKeyProvider() {
       return mapOfComplexKeyAndIntegerProvider;
-    }
-
-    @IdentifierNameString
-    private static final class LazyClassKeyProvider {
-      static String mapkeys_MapKeys_Inaccessible = "mapkeys.MapKeys$Inaccessible";
     }
   }
 }

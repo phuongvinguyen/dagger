@@ -2,10 +2,11 @@ package test;
 
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata("test.FooConstructorQualifier")
@@ -20,7 +21,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class Foo_Factory implements Factory<Foo> {
   private final Provider<Integer> iProvider;
@@ -46,6 +48,12 @@ public final class Foo_Factory implements Factory<Foo> {
     Foo_MembersInjector.injectInjectField(instance, injectFieldProvider2.get());
     Foo_MembersInjector.injectInjectMethod(instance, fProvider.get());
     return instance;
+  }
+
+  public static Foo_Factory create(javax.inject.Provider<Integer> iProvider,
+      javax.inject.Provider<String> injectFieldProvider,
+      javax.inject.Provider<String> injectFieldProvider2, javax.inject.Provider<Float> fProvider) {
+    return new Foo_Factory(Providers.asDaggerProvider(iProvider), Providers.asDaggerProvider(injectFieldProvider), Providers.asDaggerProvider(injectFieldProvider2), Providers.asDaggerProvider(fProvider));
   }
 
   public static Foo_Factory create(Provider<Integer> iProvider,

@@ -27,6 +27,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    namespace "dagger.android.simple"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11

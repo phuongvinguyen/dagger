@@ -15,6 +15,8 @@
 # Description:
 #   The annotation for aggregating information about processed Hilt roots.
 
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(default_visibility = ["//:src"])
 
 java_library(

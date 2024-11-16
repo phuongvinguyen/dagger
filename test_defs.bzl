@@ -17,7 +17,7 @@
 load("@rules_java//java:defs.bzl", "java_library", "java_test")
 load("//:build_defs.bzl", "JAVA_RELEASE_MIN")
 load(
-    "@io_bazel_rules_kotlin//kotlin:kotlin.bzl",
+    "@io_bazel_rules_kotlin//kotlin:jvm.bzl",
     "kt_jvm_library",
     "kt_jvm_test",
 )
@@ -27,7 +27,6 @@ load(
 _NON_FUNCTIONAL_BUILD_VARIANTS = {None: []}
 _FUNCTIONAL_BUILD_VARIANTS = {
     None: [],  # The default build variant (no javacopts).
-    "ExtendsComponent": ["-Adagger.generatedClassExtendsComponent=enabled"],
     "Shards": ["-Adagger.keysPerComponentShard=2"],
     "FastInit": ["-Adagger.fastInit=enabled"],
     "FastInit_Shards": ["-Adagger.fastInit=enabled", "-Adagger.keysPerComponentShard=2"],

@@ -18,7 +18,8 @@ import test.sub.TestComponentBase_ProtectedType_Factory;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class DaggerTestComponent {
   private DaggerTestComponent() {

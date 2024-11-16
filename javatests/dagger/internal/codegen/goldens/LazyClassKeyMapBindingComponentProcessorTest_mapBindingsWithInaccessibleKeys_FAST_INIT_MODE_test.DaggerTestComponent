@@ -2,13 +2,13 @@ package test;
 
 import com.google.common.collect.ImmutableMap;
 import dagger.internal.DaggerGenerated;
-import dagger.internal.IdentifierNameString;
 import dagger.internal.LazyClassKeyMap;
 import dagger.internal.Provider;
 import java.util.Map;
 import javax.annotation.processing.Generated;
 import mapkeys.MapKeys;
 import mapkeys.MapModule;
+import mapkeys.MapModule_ClassKey_LazyMapKey;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleArrayValueMapKey;
 import mapkeys.MapModule_ComplexKeyWithInaccessibleValueMapKey;
@@ -24,7 +24,8 @@ import mapkeys.MapModule_ComplexKeyWithInaccessibleValueMapKey;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {
@@ -101,7 +102,7 @@ final class DaggerTestComponent {
       public T get() {
         switch (id) {
           case 0: // java.util.Map<java.lang.Class<?>,java.lang.Integer> 
-          return (T) LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(LazyClassKeyProvider.mapkeys_MapKeys_Inaccessible, MapModule.classKey()));
+          return (T) LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(MapModule_ClassKey_LazyMapKey.lazyClassKeyName, MapModule.classKey()));
 
           case 1: // java.util.Map<mapkeys.MapKeys.ComplexKey,java.lang.Integer> 
           return (T) ImmutableMap.<MapKeys.ComplexKey, Integer>of(MapModule_ComplexKeyWithInaccessibleValueMapKey.create(), MapModule.complexKeyWithInaccessibleValue(), MapModule_ComplexKeyWithInaccessibleArrayValueMapKey.create(), MapModule.complexKeyWithInaccessibleArrayValue(), MapModule_ComplexKeyWithInaccessibleAnnotationValueMapKey.create(), MapModule.complexKeyWithInaccessibleAnnotationValue());
@@ -109,11 +110,6 @@ final class DaggerTestComponent {
           default: throw new AssertionError(id);
         }
       }
-    }
-
-    @IdentifierNameString
-    private static final class LazyClassKeyProvider {
-      static String mapkeys_MapKeys_Inaccessible = "mapkeys.MapKeys$Inaccessible";
     }
   }
 }

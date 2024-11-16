@@ -14,6 +14,7 @@
 # Description:
 #   Tests for internal code for implementing Hilt processors.
 
+load("@rules_java//java:defs.bzl", "java_library")
 load("//java/dagger/testing/compile:macros.bzl", "compiler_test")
 
 package(default_visibility = ["//:src"])

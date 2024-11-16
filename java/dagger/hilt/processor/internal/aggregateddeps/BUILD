@@ -15,6 +15,8 @@
 # Description:
 #   A processor that aggregates metadata about Hilt @InstallIn annotations
 
+load("@rules_java//java:defs.bzl", "java_library", "java_plugin")
+
 package(default_visibility = ["//:src"])
 
 # TODO(bcorso): Remove all AggregatedDeps usage from the processor class path.

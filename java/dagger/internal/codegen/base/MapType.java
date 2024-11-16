@@ -23,15 +23,24 @@ import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
 
 import androidx.room.compiler.processing.XType;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableSet;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.Key;
+import dagger.internal.codegen.model.RequestKind;
 import dagger.internal.codegen.xprocessing.XTypes;
 
 /** Information about a {@link java.util.Map} type. */
 @AutoValue
 public abstract class MapType {
+  // TODO(b/28555349): support PROVIDER_OF_LAZY here too
+  // TODO(b/376124787): We could consolidate this with a similar list in FrameworkTypes
+  // if we had a better way to go from RequestKind to framework ClassName or vice versa
+  /** The valid framework request kinds allowed on a multibinding map value. */
+  private static final ImmutableSet<RequestKind> VALID_FRAMEWORK_REQUEST_KINDS =
+      ImmutableSet.of(RequestKind.PROVIDER, RequestKind.PRODUCER, RequestKind.PRODUCED);
+
   private XType type;
 
   /** The map type itself. */
@@ -74,35 +83,45 @@ public abstract class MapType {
 
   /** Returns {@code true} if the raw type of {@link #valueType()} is a framework type. */
   public boolean valuesAreFrameworkType() {
-    return FrameworkTypes.isFrameworkType(valueType());
+    return valueRequestKind() != RequestKind.INSTANCE;
   }
 
   /**
-   * {@code V} if {@link #valueType()} is a framework type like {@code Provider<V>} or {@code
-   * Producer<V>}.
+   * Returns the map's {@link #valueType()} without any wrapping framework type, if one exists.
    *
-   * @throws IllegalStateException if {@link #isRawType()} is true or {@link #valueType()} is not a
-   *     framework type
+   * <p>In particular, this method returns {@code V} for all of the following map types:
+   * {@code Map<K,V>}, {@code Map<K,Provider<V>>}, {@code Map<K,Producer<V>>}, and
+   * {@code Map<K,Produced<V>>}.
+   *
+   * <p>Note that we don't consider {@code Lazy} a framework type for this particular case, so this
+   * method will return {@code Lazy<V>} for {@code Map<K,Lazy<V>>}.
+   *
+   * @throws IllegalStateException if {@link #isRawType()} is true.
    */
   public XType unwrappedFrameworkValueType() {
-    checkState(valuesAreFrameworkType(), "called unwrappedFrameworkValueType() on %s", type());
-    return uncheckedUnwrappedValueType();
+    return valuesAreFrameworkType() ? unwrapType(valueType()) : valueType();
   }
 
   /**
-   * {@code V} if {@link #valueType()} is a {@code WrappingClass<V>}.
+   * Returns the {@link RequestKind} of the {@link #valueType()}.
    *
-   * @throws IllegalStateException if {@link #isRawType()} is true or {@link #valueType()} is not a
-   *     {@code WrappingClass<V>}
+   * @throws IllegalArgumentException if {@link #isRawType()} is true.
    */
-  // TODO(b/202033221): Consider using stricter input type, e.g. FrameworkType.
-  public XType unwrappedValueType(ClassName wrappingClass) {
-    checkState(valuesAreTypeOf(wrappingClass), "expected values to be %s: %s", wrappingClass, this);
-    return uncheckedUnwrappedValueType();
-  }
-
-  private XType uncheckedUnwrappedValueType() {
-    return unwrapType(valueType());
+  public RequestKind valueRequestKind() {
+    checkArgument(!isRawType());
+    RequestKind requestKind = RequestKinds.getRequestKind(valueType());
+    if (VALID_FRAMEWORK_REQUEST_KINDS.contains(requestKind)) {
+      return requestKind;
+    } else if (requestKind == RequestKind.PROVIDER_OF_LAZY) {
+      // This is kind of a weird case. We don't support Map<K, Lazy<V>>, so we also don't support
+      // Map<K, Provider<Lazy<V>>> directly. However, if the user bound that themselves, we don't
+      // want that to get confused as a normal instance request, so return PROVIDER here.
+      return RequestKind.PROVIDER;
+    } else {
+      // Not all RequestKinds are supported, so if there's a map value that matches an unsupported
+      // RequestKind, just treat it like it is a normal instance request.
+      return RequestKind.INSTANCE;
+    }
   }
 
   /** {@code true} if {@code type} is a {@link java.util.Map} type. */

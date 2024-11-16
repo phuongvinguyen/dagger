@@ -4,10 +4,11 @@ import dagger.Lazy;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.DoubleCheck;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata("test.QualifierA")
@@ -22,7 +23,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A, B>> {
   private final Provider<A> aProvider;
@@ -82,6 +84,17 @@ public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A,
     return newInstance(aProvider.get(), a2Provider.get(), paProvider, qaProvider.get(), DoubleCheck.lazy(laProvider), sProvider.get(), s2Provider.get(), psProvider, qsProvider.get(), DoubleCheck.lazy(lsProvider), bProvider.get(), b2Provider.get(), pbProvider, qbProvider.get(), DoubleCheck.lazy(lbProvider));
   }
 
+  public static <A, B> GenericClass_Factory<A, B> create(javax.inject.Provider<A> aProvider,
+      javax.inject.Provider<A> a2Provider, javax.inject.Provider<A> paProvider,
+      javax.inject.Provider<A> qaProvider, javax.inject.Provider<A> laProvider,
+      javax.inject.Provider<String> sProvider, javax.inject.Provider<String> s2Provider,
+      javax.inject.Provider<String> psProvider, javax.inject.Provider<String> qsProvider,
+      javax.inject.Provider<String> lsProvider, javax.inject.Provider<B> bProvider,
+      javax.inject.Provider<B> b2Provider, javax.inject.Provider<B> pbProvider,
+      javax.inject.Provider<B> qbProvider, javax.inject.Provider<B> lbProvider) {
+    return new GenericClass_Factory<A, B>(Providers.asDaggerProvider(aProvider), Providers.asDaggerProvider(a2Provider), Providers.asDaggerProvider(paProvider), Providers.asDaggerProvider(qaProvider), Providers.asDaggerProvider(laProvider), Providers.asDaggerProvider(sProvider), Providers.asDaggerProvider(s2Provider), Providers.asDaggerProvider(psProvider), Providers.asDaggerProvider(qsProvider), Providers.asDaggerProvider(lsProvider), Providers.asDaggerProvider(bProvider), Providers.asDaggerProvider(b2Provider), Providers.asDaggerProvider(pbProvider), Providers.asDaggerProvider(qbProvider), Providers.asDaggerProvider(lbProvider));
+  }
+
   public static <A, B> GenericClass_Factory<A, B> create(Provider<A> aProvider,
       Provider<A> a2Provider, Provider<A> paProvider, Provider<A> qaProvider,
       Provider<A> laProvider, Provider<String> sProvider, Provider<String> s2Provider,
@@ -91,9 +104,9 @@ public final class GenericClass_Factory<A, B> implements Factory<GenericClass<A,
     return new GenericClass_Factory<A, B>(aProvider, a2Provider, paProvider, qaProvider, laProvider, sProvider, s2Provider, psProvider, qsProvider, lsProvider, bProvider, b2Provider, pbProvider, qbProvider, lbProvider);
   }
 
-  public static <A, B> GenericClass<A, B> newInstance(A a, A a2, Provider<A> pa, A qa, Lazy<A> la,
-      String s, String s2, Provider<String> ps, String qs, Lazy<String> ls, B b, B b2,
-      Provider<B> pb, B qb, Lazy<B> lb) {
+  public static <A, B> GenericClass<A, B> newInstance(A a, A a2, javax.inject.Provider<A> pa, A qa,
+      Lazy<A> la, String s, String s2, javax.inject.Provider<String> ps, String qs, Lazy<String> ls,
+      B b, B b2, javax.inject.Provider<B> pb, B qb, Lazy<B> lb) {
     return new GenericClass<A, B>(a, a2, pa, qa, la, s, s2, ps, qs, ls, b, b2, pb, qb, lb);
   }
 }

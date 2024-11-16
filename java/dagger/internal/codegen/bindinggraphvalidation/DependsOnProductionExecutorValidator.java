@@ -19,8 +19,9 @@ package dagger.internal.codegen.bindinggraphvalidation;
 import static dagger.internal.codegen.extension.DaggerStreams.instancesOf;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+import androidx.room.compiler.processing.XProcessingEnv;
 import dagger.internal.codegen.binding.KeyFactory;
-import dagger.internal.codegen.compileroption.CompilerOptions;
+import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.Binding;
 import dagger.internal.codegen.model.BindingGraph;
 import dagger.internal.codegen.model.BindingGraph.MaybeBinding;
@@ -34,12 +35,12 @@ import javax.inject.Inject;
  */
 // TODO(dpb,beder): Validate this during @Inject/@Provides/@Produces validation.
 final class DependsOnProductionExecutorValidator extends ValidationBindingGraphPlugin {
-  private final CompilerOptions compilerOptions;
+  private final XProcessingEnv processingEnv;
   private final KeyFactory keyFactory;
 
   @Inject
-  DependsOnProductionExecutorValidator(CompilerOptions compilerOptions, KeyFactory keyFactory) {
-    this.compilerOptions = compilerOptions;
+  DependsOnProductionExecutorValidator(XProcessingEnv processingEnv, KeyFactory keyFactory) {
+    this.processingEnv = processingEnv;
     this.keyFactory = keyFactory;
   }
 
@@ -50,7 +51,7 @@ final class DependsOnProductionExecutorValidator extends ValidationBindingGraphP
 
   @Override
   public void visitGraph(BindingGraph bindingGraph, DiagnosticReporter diagnosticReporter) {
-    if (!compilerOptions.usesProducers()) {
+    if (!usesProducers()) {
       return;
     }
 
@@ -68,5 +69,9 @@ final class DependsOnProductionExecutorValidator extends ValidationBindingGraphP
   private void reportError(DiagnosticReporter diagnosticReporter, Binding binding) {
     diagnosticReporter.reportBinding(
         ERROR, binding, "%s may not depend on the production executor", binding.key());
+  }
+
+  private boolean usesProducers() {
+    return processingEnv.findTypeElement(TypeNames.PRODUCES) != null;
   }
 }

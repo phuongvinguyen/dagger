@@ -17,7 +17,7 @@
 package dagger.hilt.processor.internal.kotlin;
 
 import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
-import static kotlinx.metadata.Flag.ValueParameter.DECLARES_DEFAULT_VALUE;
+import static kotlin.metadata.Flag.ValueParameter.DECLARES_DEFAULT_VALUE;
 
 import androidx.room.compiler.processing.XAnnotation;
 import androidx.room.compiler.processing.XFieldElement;
@@ -38,16 +38,16 @@ import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import kotlin.Metadata;
-import kotlinx.metadata.Flag;
-import kotlinx.metadata.KmClass;
-import kotlinx.metadata.KmConstructor;
-import kotlinx.metadata.KmFunction;
-import kotlinx.metadata.KmProperty;
-import kotlinx.metadata.jvm.JvmExtensionsKt;
-import kotlinx.metadata.jvm.JvmFieldSignature;
-import kotlinx.metadata.jvm.JvmMetadataUtil;
-import kotlinx.metadata.jvm.JvmMethodSignature;
-import kotlinx.metadata.jvm.KotlinClassMetadata;
+import kotlin.metadata.Flag;
+import kotlin.metadata.KmClass;
+import kotlin.metadata.KmConstructor;
+import kotlin.metadata.KmFunction;
+import kotlin.metadata.KmProperty;
+import kotlin.metadata.jvm.JvmExtensionsKt;
+import kotlin.metadata.jvm.JvmFieldSignature;
+import kotlin.metadata.jvm.JvmMetadataUtil;
+import kotlin.metadata.jvm.JvmMethodSignature;
+import kotlin.metadata.jvm.KotlinClassMetadata;
 
 /** Data class of a TypeElement and its Kotlin metadata. */
 @AutoValue

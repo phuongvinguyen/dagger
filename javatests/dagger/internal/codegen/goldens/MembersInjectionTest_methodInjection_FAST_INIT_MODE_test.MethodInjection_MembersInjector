@@ -4,9 +4,10 @@ import dagger.Lazy;
 import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.DoubleCheck;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @QualifierMetadata
 @DaggerGenerated
@@ -20,7 +21,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class MethodInjection_MembersInjector implements MembersInjector<MethodInjection> {
   private final Provider<String> stringProvider;
@@ -46,6 +48,13 @@ public final class MethodInjection_MembersInjector implements MembersInjector<Me
     return new MethodInjection_MembersInjector(stringProvider, stringProvider2, stringProvider3, stringProvider4);
   }
 
+  public static MembersInjector<MethodInjection> create(
+      javax.inject.Provider<String> stringProvider, javax.inject.Provider<String> stringProvider2,
+      javax.inject.Provider<String> stringProvider3,
+      javax.inject.Provider<String> stringProvider4) {
+    return new MethodInjection_MembersInjector(Providers.asDaggerProvider(stringProvider), Providers.asDaggerProvider(stringProvider2), Providers.asDaggerProvider(stringProvider3), Providers.asDaggerProvider(stringProvider4));
+  }
+
   @Override
   public void injectMembers(MethodInjection instance) {
     injectNoArgs(instance);
@@ -62,7 +71,7 @@ public final class MethodInjection_MembersInjector implements MembersInjector<Me
   }
 
   public static void injectManyArgs(Object instance, String string, Lazy<String> lazyString,
-      Provider<String> stringProvider) {
+      javax.inject.Provider<String> stringProvider) {
     ((MethodInjection) instance).manyArgs(string, lazyString, stringProvider);
   }
 }

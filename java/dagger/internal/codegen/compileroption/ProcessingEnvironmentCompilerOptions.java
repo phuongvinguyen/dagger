@@ -29,12 +29,12 @@ import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompil
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FLOATING_BINDS_METHODS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.FORMAT_GENERATED_SOURCE;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.GENERATED_CLASS_EXTENDS_COMPONENT;
-import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.IGNORE_PROVISION_KEY_WILDCARDS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.INCLUDE_STACKTRACE_WITH_DEFERRED_ERROR_MESSAGES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.PLUGINS_VISIT_FULL_BINDING_GRAPHS;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_MULTIBINDING_VALIDATION;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.STRICT_SUPERFICIAL_VALIDATION;
+import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.USE_FRAMEWORK_TYPE_IN_MAP_MULTIBINDING_CONTRIBUTION_KEY;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.VALIDATE_TRANSITIVE_COMPONENT_DEPENDENCIES;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WARN_IF_INJECTION_FACTORY_NOT_GENERATED_UPSTREAM;
 import static dagger.internal.codegen.compileroption.ProcessingEnvironmentCompilerOptions.Feature.WRITE_PRODUCER_NAME_IN_TOKEN;
@@ -61,7 +61,6 @@ import com.google.common.base.Ascii;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import dagger.internal.codegen.javapoet.TypeNames;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -93,11 +92,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     this.messager = messager;
     this.options = options;
     checkValid();
-  }
-
-  @Override
-  public boolean usesProducers() {
-    return processingEnv.findTypeElement(TypeNames.PRODUCES) != null;
   }
 
   @Override
@@ -145,11 +139,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   }
 
   @Override
-  public boolean ignorePrivateAndStaticInjectionForComponent() {
-    return isEnabled(IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT);
-  }
-
-  @Override
   public ValidationType scopeCycleValidationType() {
     return parseOption(DISABLE_INTER_COMPONENT_SCOPE_VALIDATION);
   }
@@ -187,6 +176,11 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
   @Override
   public boolean experimentalDaggerErrorMessages() {
     return isEnabled(EXPERIMENTAL_DAGGER_ERROR_MESSAGES);
+  }
+
+  @Override
+  public boolean useFrameworkTypeInMapMultibindingContributionKey() {
+    return isEnabled(USE_FRAMEWORK_TYPE_IN_MAP_MULTIBINDING_CONTRIBUTION_KEY);
   }
 
   @Override
@@ -325,8 +319,6 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
 
     INCLUDE_STACKTRACE_WITH_DEFERRED_ERROR_MESSAGES,
 
-    IGNORE_PRIVATE_AND_STATIC_INJECTION_FOR_COMPONENT,
-
     EXPERIMENTAL_AHEAD_OF_TIME_SUBCOMPONENTS,
 
     FORCE_USE_SERIALIZED_COMPONENT_IMPLEMENTATIONS,
@@ -344,6 +336,8 @@ public final class ProcessingEnvironmentCompilerOptions extends CompilerOptions 
     STRICT_SUPERFICIAL_VALIDATION(ENABLED),
 
     GENERATED_CLASS_EXTENDS_COMPONENT,
+
+    USE_FRAMEWORK_TYPE_IN_MAP_MULTIBINDING_CONTRIBUTION_KEY,
 
     IGNORE_PROVISION_KEY_WILDCARDS(ENABLED),
 

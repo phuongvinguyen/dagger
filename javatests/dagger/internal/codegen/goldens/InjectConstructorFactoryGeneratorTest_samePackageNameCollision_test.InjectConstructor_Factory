@@ -2,10 +2,11 @@ package test;
 
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata
@@ -20,7 +21,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class InjectConstructor_Factory implements Factory<InjectConstructor> {
   private final Provider<other.pkg.CommonName> otherPackageProvider;
@@ -36,6 +38,12 @@ public final class InjectConstructor_Factory implements Factory<InjectConstructo
   @Override
   public InjectConstructor get() {
     return newInstance(otherPackageProvider.get(), samePackageProvider.get());
+  }
+
+  public static InjectConstructor_Factory create(
+      javax.inject.Provider<other.pkg.CommonName> otherPackageProvider,
+      javax.inject.Provider<CommonName> samePackageProvider) {
+    return new InjectConstructor_Factory(Providers.asDaggerProvider(otherPackageProvider), Providers.asDaggerProvider(samePackageProvider));
   }
 
   public static InjectConstructor_Factory create(

@@ -36,7 +36,9 @@ import dagger.hilt.internal.GeneratedComponentManager;
  * because even the injector interface type is not a valid type if we have a hilt base class.
  *
  */
-public class ActivityComponentManager implements GeneratedComponentManager<Object> {
+public class ActivityComponentManager
+    implements
+        GeneratedComponentManager<Object> {
   /** Entrypoint for {@link ActivityComponentBuilder}. */
   @EntryPoint
   @InstallIn(ActivityRetainedComponent.class)

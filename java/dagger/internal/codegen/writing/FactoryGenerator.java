@@ -31,6 +31,7 @@ import static dagger.internal.codegen.extension.DaggerStreams.toImmutableMap;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.suppressWarnings;
+import static dagger.internal.codegen.javapoet.CodeBlocks.makeParametersCodeBlock;
 import static dagger.internal.codegen.javapoet.CodeBlocks.parameterNames;
 import static dagger.internal.codegen.javapoet.TypeNames.factoryOf;
 import static dagger.internal.codegen.model.BindingKind.INJECTION;
@@ -48,12 +49,14 @@ import androidx.room.compiler.processing.XProcessingEnv;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dagger.internal.codegen.base.SourceFileGenerator;
@@ -73,6 +76,7 @@ import dagger.internal.codegen.model.Key;
 import dagger.internal.codegen.model.Scope;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
 import dagger.internal.codegen.writing.InjectionMethods.ProvisionMethod;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -135,7 +139,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ContributionBind
 
     return factoryBuilder
         .addMethod(getMethod(binding, factoryFields))
-        .addMethod(staticCreateMethod(binding, factoryFields))
+        .addMethods(staticCreateMethod(binding, factoryFields))
         .addMethod(staticProvisionMethod(binding));
   }
 
@@ -193,10 +197,12 @@ public final class FactoryGenerator extends SourceFileGenerator<ContributionBind
   //     Provider<Baz> bazProvider) {
   //   return new FooModule_ProvidesFooFactory(module, barProvider, bazProvider);
   // }
-  private MethodSpec staticCreateMethod(ContributionBinding binding, FactoryFields factoryFields) {
+  private ImmutableList<MethodSpec> staticCreateMethod(
+      ContributionBinding binding, FactoryFields factoryFields) {
     // We use a static create method so that generated components can avoid having to refer to the
     // generic types of the factory.  (Otherwise they may have visibility problems referring to the
     // types.)
+    ImmutableList.Builder<MethodSpec> methodsBuilder = ImmutableList.builder();
     MethodSpec.Builder createMethodBuilder =
         methodBuilder("create")
             .addModifiers(PUBLIC, STATIC)
@@ -219,8 +225,32 @@ public final class FactoryGenerator extends SourceFileGenerator<ContributionBind
               "return new $T($L)",
               parameterizedGeneratedTypeNameForBinding(binding),
               parameterNames(parameters));
+      // If any of the parameters take a Dagger Provider type, we also need to make a
+      // Javax Provider type for backwards compatibility with components generated at
+      // an older version.
+      // Eventually, we will need to remove this and break backwards compatibility
+      // in order to fully cut the Javax dependency.
+      if (hasDaggerProviderParams(parameters)) {
+        methodsBuilder.add(javaxCreateMethod(binding, parameters));
+      }
     }
-    return createMethodBuilder.build();
+    methodsBuilder.add(createMethodBuilder.build());
+    return methodsBuilder.build();
+  }
+
+  private MethodSpec javaxCreateMethod(
+      ContributionBinding binding, ImmutableList<ParameterSpec> parameters) {
+    ImmutableList<ParameterSpec> remappedParams = remapParamsToJavaxProvider(parameters);
+    return methodBuilder("create")
+        .addModifiers(PUBLIC, STATIC)
+        .returns(parameterizedGeneratedTypeNameForBinding(binding))
+        .addTypeVariables(bindingTypeElementTypeVariableNames(binding))
+        .addParameters(remappedParams)
+        .addStatement(
+            "return new $T($L)",
+            parameterizedGeneratedTypeNameForBinding(binding),
+            wrappedParametersCodeBlock(remappedParams))
+        .build();
   }
 
   // Example 1: Provision binding.
@@ -274,11 +304,7 @@ public final class FactoryGenerator extends SourceFileGenerator<ContributionBind
           .nullability()
           .nonTypeUseNullableAnnotations()
           .forEach(getMethod::addAnnotation);
-      getMethod.returns(
-          providedTypeName.annotated(binding.nullability().typeUseNullableAnnotations().stream()
-              .map(annotation -> AnnotationSpec.builder(annotation).build())
-              .collect(toImmutableList())));
-      getMethod.addStatement("return $L", invokeNewInstance);
+      getMethod.addStatement("return $L", invokeNewInstance).returns(providedTypeName);
     } else if (!injectionSites(binding).isEmpty()) {
       CodeBlock instance = CodeBlock.of("instance");
       getMethod
@@ -368,13 +394,67 @@ public final class FactoryGenerator extends SourceFileGenerator<ContributionBind
   }
 
   private static TypeName providedTypeName(ContributionBinding binding) {
-    return binding.contributedType().getTypeName();
+    return binding
+        .contributedType()
+        .getTypeName()
+        .annotated(
+            binding.nullability().typeUseNullableAnnotations().stream()
+                .map(annotation -> AnnotationSpec.builder(annotation).build())
+                .collect(toImmutableList()));
   }
 
   private static Optional<TypeName> factoryTypeName(ContributionBinding binding) {
     return binding.kind() == BindingKind.ASSISTED_INJECTION
         ? Optional.empty()
         : Optional.of(factoryOf(providedTypeName(binding)));
+  }
+
+  // Open for sharing with ProducerFactoryGenerator and MembersInjectorGenerator
+  static boolean hasDaggerProviderParams(List<ParameterSpec> params) {
+    return params.stream().anyMatch(param -> isDaggerProviderType(param.type));
+  }
+
+  // Open for sharing with ProducerFactoryGenerator and MembersInjectorGenerator
+  // Returns a code block that represents a parameter list where any javax Provider
+  // types are wrapped in an asDaggerProvider call
+  static CodeBlock wrappedParametersCodeBlock(List<ParameterSpec> params) {
+    return makeParametersCodeBlock(
+        Lists.transform(
+            params,
+            input ->
+            isProviderType(input.type)
+            ? CodeBlock.of(
+                "$T.asDaggerProvider($N)", TypeNames.DAGGER_PROVIDERS, input)
+            : CodeBlock.of("$N", input)));
+  }
+
+  // Open for sharing with ProducerFactoryGenerator and MembersInjectorGenerator
+  static ImmutableList<ParameterSpec> remapParamsToJavaxProvider(List<ParameterSpec> params) {
+    return params.stream()
+        .map(param -> ParameterSpec.builder(
+            remapDaggerProviderToProvider(param.type), param.name).build())
+        .collect(toImmutableList());
+  }
+
+  private static boolean isDaggerProviderType(TypeName type) {
+    return type instanceof ParameterizedTypeName
+        && ((ParameterizedTypeName) type).rawType.equals(TypeNames.DAGGER_PROVIDER);
+  }
+
+  private static boolean isProviderType(TypeName type) {
+    return type instanceof ParameterizedTypeName
+        && ((ParameterizedTypeName) type).rawType.equals(TypeNames.PROVIDER);
+  }
+
+  private static TypeName remapDaggerProviderToProvider(TypeName type) {
+    if (type instanceof ParameterizedTypeName) {
+      ParameterizedTypeName parameterizedTypeName = (ParameterizedTypeName) type;
+      if (parameterizedTypeName.rawType.equals(TypeNames.DAGGER_PROVIDER)) {
+        return ParameterizedTypeName.get(
+            TypeNames.PROVIDER, parameterizedTypeName.typeArguments.toArray(new TypeName[0]));
+      }
+    }
+    return type;
   }
 
   /** Represents the available fields in the generated factory class. */

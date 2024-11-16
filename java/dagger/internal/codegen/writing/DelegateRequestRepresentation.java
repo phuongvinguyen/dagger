@@ -127,7 +127,7 @@ final class DelegateRequestRepresentation extends RequestRepresentation {
     // Casted raw type provider expression has to be wrapped parentheses, otherwise there
     // will be an error when DerivedFromFrameworkInstanceRequestRepresentation appends a `get()` to
     // it.
-    // TODO(wanyingd): change the logic to only add parenthesis when necessary.
+    // TODO(bcorso): change the logic to only add parenthesis when necessary.
     return Expression.create(
         castedExpression.type(), CodeBlock.of("($L)", castedExpression.codeBlock()));
   }

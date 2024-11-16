@@ -14,6 +14,7 @@
 # Description:
 #   Testing libraries for Hilt Android.
 
+load("@rules_java//java:defs.bzl", "java_library")
 load("//:build_defs.bzl", "POM_VERSION")
 load("//tools/maven:maven.bzl", "gen_maven_artifact")
 

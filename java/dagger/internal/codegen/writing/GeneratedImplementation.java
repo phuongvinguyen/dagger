@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.writing;
 
+import com.google.common.base.Supplier;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -40,6 +41,9 @@ public interface GeneratedImplementation {
 
   /** Adds the given type to the generated implementation. */
   void addType(TypeSpecKind typeKind, TypeSpec typeSpec);
+
+  /** Adds a {@link Supplier} for a {@link TypeSpec} to the generated implementation. */
+  void addTypeSupplier(Supplier<TypeSpec> typeSupplier);
 
   /** Returns the {@link TypeSpec} for this generated implementation. */
   public TypeSpec generate();

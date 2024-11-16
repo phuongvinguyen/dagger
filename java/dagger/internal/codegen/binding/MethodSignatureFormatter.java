@@ -38,6 +38,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.ClassName;
 import dagger.internal.codegen.base.Formatter;
+import dagger.internal.codegen.xprocessing.Nullability;
 import dagger.internal.codegen.xprocessing.XAnnotations;
 import dagger.internal.codegen.xprocessing.XTypes;
 import java.util.Iterator;

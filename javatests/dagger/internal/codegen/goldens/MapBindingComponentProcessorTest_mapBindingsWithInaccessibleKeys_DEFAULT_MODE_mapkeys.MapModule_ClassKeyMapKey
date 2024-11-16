@@ -14,7 +14,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class MapModule_ClassKeyMapKey {
   private MapModule_ClassKeyMapKey() {

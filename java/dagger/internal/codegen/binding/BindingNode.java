@@ -115,6 +115,16 @@ public abstract class BindingNode implements dagger.internal.codegen.model.Bindi
     return declarationFormatter.format(delegate());
   }
 
+  public BindingNode withBindingType(BindingType bindingType) {
+    return create(
+        componentPath(),
+        ((ContributionBinding) delegate()).withBindingType(bindingType),
+        multibindingDeclarations(),
+        optionalBindingDeclarations(),
+        subcomponentDeclarations(),
+        declarationFormatter);
+  }
+
   static final class Factory {
     private final DeclarationFormatter declarationFormatter;
 
@@ -148,15 +158,31 @@ public abstract class BindingNode implements dagger.internal.codegen.model.Bindi
         ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
         ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
         ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations) {
-      BindingNode node =
-          new AutoValue_BindingNode(
-              component,
-              delegate,
-              multibindingDeclarations,
-              optionalBindingDeclarations,
-              subcomponentDeclarations);
-      node.declarationFormatter = declarationFormatter;
-      return node;
+      return BindingNode.create(
+          component,
+          delegate,
+          multibindingDeclarations,
+          optionalBindingDeclarations,
+          subcomponentDeclarations,
+          declarationFormatter);
     }
+  }
+
+  private static BindingNode create(
+      ComponentPath component,
+      Binding delegate,
+      ImmutableSet<MultibindingDeclaration> multibindingDeclarations,
+      ImmutableSet<OptionalBindingDeclaration> optionalBindingDeclarations,
+      ImmutableSet<SubcomponentDeclaration> subcomponentDeclarations,
+      DeclarationFormatter declarationFormatter) {
+    BindingNode node =
+        new AutoValue_BindingNode(
+            component,
+            delegate,
+            multibindingDeclarations,
+            optionalBindingDeclarations,
+            subcomponentDeclarations);
+    node.declarationFormatter = declarationFormatter;
+    return node;
   }
 }

@@ -15,6 +15,8 @@
 # Description:
 #   Tests for internal code for implementing Hilt processors.
 
+load("@rules_java//java:defs.bzl", "java_library", "java_test")
+
 package(default_visibility = ["//:src"])
 
 java_test(

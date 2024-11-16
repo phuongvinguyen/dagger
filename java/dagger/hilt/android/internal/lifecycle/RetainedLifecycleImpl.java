@@ -25,7 +25,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Internal implementation. Do not use. */
-public final class RetainedLifecycleImpl implements ActivityRetainedLifecycle, ViewModelLifecycle {
+public final class RetainedLifecycleImpl
+    implements ActivityRetainedLifecycle,
+        ViewModelLifecycle {
 
   private final Set<RetainedLifecycle.OnClearedListener> listeners = new HashSet<>();
   private boolean onClearedDispatched = false;

@@ -33,7 +33,7 @@ final class InjectBindingValidator extends ValidationBindingGraphPlugin {
 
   @Inject
   InjectBindingValidator(InjectValidator injectValidator) {
-    this.injectValidator = injectValidator.whenGeneratingCode();
+    this.injectValidator = injectValidator;
   }
 
   @Override
@@ -50,7 +50,8 @@ final class InjectBindingValidator extends ValidationBindingGraphPlugin {
 
   private void validateInjectionBinding(Binding node, DiagnosticReporter diagnosticReporter) {
     ValidationReport typeReport =
-        injectValidator.validate(node.key().type().xprocessing().getTypeElement());
+        injectValidator.validateWhenGeneratingCode(
+            node.key().type().xprocessing().getTypeElement());
     for (Item item : typeReport.allItems()) {
       diagnosticReporter.reportBinding(item.kind(), node, item.message());
     }

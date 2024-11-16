@@ -27,6 +27,8 @@ import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.binding.MembersInjectionBinding.InjectionSite;
 import dagger.internal.codegen.model.BindingKind;
 import dagger.internal.codegen.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.Nullability;
+import java.util.Optional;
 
 /** A binding for a {@link BindingKind#INJECTION}. */
 @CheckReturnValue
@@ -38,8 +40,8 @@ public abstract class InjectionBinding extends ContributionBinding {
   }
 
   @Override
-  public BindingType bindingType() {
-    return BindingType.PROVISION;
+  public Optional<BindingType> optionalBindingType() {
+    return Optional.of(BindingType.PROVISION);
   }
 
   @Override

@@ -44,7 +44,7 @@ import dagger.internal.codegen.model.Binding;
 import dagger.internal.codegen.model.BindingGraph;
 import dagger.internal.codegen.model.BindingGraph.DependencyEdge;
 import dagger.internal.codegen.model.BindingGraph.MissingBinding;
-import dagger.internal.codegen.model.DaggerAnnotation;
+import dagger.internal.codegen.model.DaggerType;
 import dagger.internal.codegen.model.DiagnosticReporter;
 import dagger.internal.codegen.model.Key;
 import dagger.internal.codegen.validation.DiagnosticMessageGenerator;
@@ -53,8 +53,6 @@ import dagger.internal.codegen.xprocessing.XTypes;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 
 /** Reports errors for missing bindings. */
@@ -114,17 +112,21 @@ final class MissingBindingValidator extends ValidationBindingGraphPlugin {
 
   private static ImmutableSet<Binding> getSimilarTypeBindings(
       BindingGraph graph, Key missingBindingKey) {
-    XType missingBindingType = missingBindingKey.type().xprocessing();
-    Optional<DaggerAnnotation> missingBindingQualifier = missingBindingKey.qualifier();
-    ImmutableList<TypeName> flatMissingBindingType = flattenBindingType(missingBindingType);
+    ImmutableList<TypeName> flatMissingBindingType = flattenBindingType(missingBindingKey.type());
     if (flatMissingBindingType.size() <= 1) {
       return ImmutableSet.of();
     }
     return graph.bindings().stream()
-        .filter(
-            binding ->
-                binding.key().qualifier().equals(missingBindingQualifier)
-                    && isSimilarType(binding.key().type().xprocessing(), flatMissingBindingType))
+        // Filter out multibinding contributions (users can't request these directly).
+        .filter(binding -> binding.key().multibindingContributionIdentifier().isEmpty())
+        // Filter out keys with the exact same type (those are reported elsewhere).
+        .filter(binding -> !binding.key().type().equals(missingBindingKey.type()))
+        // Filter out keys with different qualifiers.
+        // TODO(bcorso): We should consider allowing keys with different qualifiers here, as that
+        // could actually be helpful when users forget a qualifier annotation on the request.
+        .filter(binding -> binding.key().qualifier().equals(missingBindingKey.qualifier()))
+        // Filter out keys that don't have a similar type (i.e. same type if ignoring wildcards).
+        .filter(binding -> isSimilarType(binding.key().type(), flatMissingBindingType))
         .collect(toImmutableSet());
   }
 
@@ -132,11 +134,11 @@ final class MissingBindingValidator extends ValidationBindingGraphPlugin {
    * Unwraps a parameterized type to a list of TypeNames. e.g. {@code Map<Foo, List<Bar>>} to {@code
    * [Map, Foo, List, Bar]}.
    */
-  private static ImmutableList<TypeName> flattenBindingType(XType type) {
+  private static ImmutableList<TypeName> flattenBindingType(DaggerType type) {
     return ImmutableList.copyOf(new TypeDfsIterator(type));
   }
 
-  private static boolean isSimilarType(XType type, List<TypeName> flatTypeNames) {
+  private static boolean isSimilarType(DaggerType type, ImmutableList<TypeName> flatTypeNames) {
     return Iterators.elementsEqual(flatTypeNames.iterator(), new TypeDfsIterator(type));
   }
 
@@ -261,8 +263,8 @@ final class MissingBindingValidator extends ValidationBindingGraphPlugin {
   private static class TypeDfsIterator implements Iterator<TypeName> {
     final Deque<XType> stack = new ArrayDeque<>();
 
-    TypeDfsIterator(XType root) {
-      stack.push(root);
+    TypeDfsIterator(DaggerType root) {
+      stack.push(root.xprocessing());
     }
 
     @Override

@@ -43,7 +43,7 @@ final class StaticFactoryInstanceSupplier implements FrameworkInstanceSupplier {
     return frameworkInstanceSupplier.memberSelect();
   }
 
-  // TODO(wanyingd): no-op members injector is currently handled in
+  // TODO(bcorso): no-op members injector is currently handled in
   // `MembersInjectorProviderCreationExpression`, we should inline the logic here so we won't create
   // an extra field for it.
   private MemberSelect staticFactoryCreation(ContributionBinding binding) {

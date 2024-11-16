@@ -2,8 +2,6 @@ package test;
 
 import com.google.common.collect.ImmutableMap;
 import dagger.internal.DaggerGenerated;
-import dagger.internal.IdentifierNameString;
-import dagger.internal.KeepFieldType;
 import dagger.internal.LazyClassKeyMap;
 import java.util.Map;
 import javax.annotation.processing.Generated;
@@ -19,7 +17,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {
@@ -52,20 +51,7 @@ final class DaggerTestComponent {
 
     @Override
     public Map<Class<?>, Integer> classKey() {
-      return LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(LazyClassKeyProvider.test_Foo_Bar, MapKeyBindingsModule.classKey(), LazyClassKeyProvider.test_Foo_Bar3, MapKeyBindingsModule.classKey2()));
-    }
-
-    @IdentifierNameString
-    private static final class LazyClassKeyProvider {
-      static String test_Foo_Bar = "test.Foo_Bar";
-
-      static String test_Foo_Bar3 = "test.Foo$Bar";
-
-      @KeepFieldType
-      Foo_Bar test_Foo_Bar2;
-
-      @KeepFieldType
-      Foo.Bar test_Foo_Bar4;
+      return LazyClassKeyMap.<Integer>of(ImmutableMap.<String, Integer>of(MapKeyBindingsModule_ClassKey_LazyMapKey.lazyClassKeyName, MapKeyBindingsModule.classKey(), MapKeyBindingsModule_ClassKey2_LazyMapKey.lazyClassKeyName, MapKeyBindingsModule.classKey2()));
     }
   }
 }

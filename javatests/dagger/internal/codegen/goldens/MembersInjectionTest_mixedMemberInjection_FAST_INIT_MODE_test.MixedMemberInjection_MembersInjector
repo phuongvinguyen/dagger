@@ -3,9 +3,10 @@ package test;
 import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.InjectedFieldSignature;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @QualifierMetadata
 @DaggerGenerated
@@ -19,7 +20,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class MixedMemberInjection_MembersInjector implements MembersInjector<MixedMemberInjection> {
   private final Provider<String> stringProvider;
@@ -41,6 +43,12 @@ public final class MixedMemberInjection_MembersInjector implements MembersInject
   public static MembersInjector<MixedMemberInjection> create(Provider<String> stringProvider,
       Provider<Object> objectProvider, Provider<String> sProvider, Provider<Object> oProvider) {
     return new MixedMemberInjection_MembersInjector(stringProvider, objectProvider, sProvider, oProvider);
+  }
+
+  public static MembersInjector<MixedMemberInjection> create(
+      javax.inject.Provider<String> stringProvider, javax.inject.Provider<Object> objectProvider,
+      javax.inject.Provider<String> sProvider, javax.inject.Provider<Object> oProvider) {
+    return new MixedMemberInjection_MembersInjector(Providers.asDaggerProvider(stringProvider), Providers.asDaggerProvider(objectProvider), Providers.asDaggerProvider(sProvider), Providers.asDaggerProvider(oProvider));
   }
 
   @Override

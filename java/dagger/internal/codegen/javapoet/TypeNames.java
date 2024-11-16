@@ -88,6 +88,7 @@ public final class TypeNames {
   public static final ClassName MEMBERS_INJECTORS =
       ClassName.get("dagger.internal", "MembersInjectors");
   public static final ClassName PROVIDER = ClassName.get("javax.inject", "Provider");
+  public static final ClassName JAKARTA_PROVIDER = ClassName.get("jakarta.inject", "Provider");
   public static final ClassName DAGGER_PROVIDER = ClassName.get("dagger.internal", "Provider");
   public static final ClassName DAGGER_PROVIDERS = ClassName.get("dagger.internal", "Providers");
   public static final ClassName PROVIDER_OF_LAZY =

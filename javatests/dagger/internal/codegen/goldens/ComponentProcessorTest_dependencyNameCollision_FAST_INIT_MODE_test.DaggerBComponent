@@ -18,7 +18,8 @@ import pkg1.AComponent;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerBComponent {
   private DaggerBComponent() {

@@ -3,9 +3,10 @@ package test;
 import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.InjectedFieldSignature;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @QualifierMetadata
 @DaggerGenerated
@@ -19,7 +20,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class Child_MembersInjector<T> implements MembersInjector<Child<T>> {
   private final Provider<T> xProvider;
@@ -44,6 +46,12 @@ public final class Child_MembersInjector<T> implements MembersInjector<Child<T>>
   public static <T> MembersInjector<Child<T>> create(Provider<T> xProvider, Provider<A> yProvider,
       Provider<A2> a2Provider, Provider<A> aProvider, Provider<T> tProvider) {
     return new Child_MembersInjector<T>(xProvider, yProvider, a2Provider, aProvider, tProvider);
+  }
+
+  public static <T> MembersInjector<Child<T>> create(javax.inject.Provider<T> xProvider,
+      javax.inject.Provider<A> yProvider, javax.inject.Provider<A2> a2Provider,
+      javax.inject.Provider<A> aProvider, javax.inject.Provider<T> tProvider) {
+    return new Child_MembersInjector<T>(Providers.asDaggerProvider(xProvider), Providers.asDaggerProvider(yProvider), Providers.asDaggerProvider(a2Provider), Providers.asDaggerProvider(aProvider), Providers.asDaggerProvider(tProvider));
   }
 
   @Override

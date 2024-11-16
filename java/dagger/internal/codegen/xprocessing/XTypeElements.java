@@ -81,7 +81,7 @@ public final class XTypeElements {
         .collect(toImmutableList());
   }
 
-  // TODO(wanyingd): rename this to getAllMethodsWithoutPrivate, since the private method declared
+  // TODO(bcorso): rename this to getAllMethodsWithoutPrivate, since the private method declared
   // within this element is being filtered out. This doesn't mirror {@code
   // MoreElements#getAllMethods}'s behavior but have the same name, and can cause confusion to
   // developers.

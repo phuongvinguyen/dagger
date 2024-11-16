@@ -25,10 +25,12 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Multimaps;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import dagger.internal.codegen.base.DaggerSuperficialValidation;
+import dagger.internal.codegen.base.FrameworkTypes;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.DaggerAnnotation;
 import dagger.internal.codegen.model.Key;
@@ -38,11 +40,7 @@ import javax.inject.Inject;
 
 /** Stores the bindings and declarations of a component by key. */
 final class ComponentDeclarations {
-  private static final ImmutableSet<TypeName> MAP_FRAMEWORK_TYPENAMES =
-      ImmutableSet.of(TypeNames.PROVIDER, TypeNames.PRODUCER, TypeNames.PRODUCED);
-  private static final ImmutableSet<TypeName> SET_FRAMEWORK_TYPENAMES =
-      ImmutableSet.of(TypeNames.PRODUCED);
-
+  private final KeyFactory keyFactory;
   private final ImmutableSetMultimap<Key, ContributionBinding> bindings;
   private final ImmutableSetMultimap<Key, DelegateDeclaration> delegates;
   private final ImmutableSetMultimap<Key, OptionalBindingDeclaration> optionalBindings;
@@ -53,6 +51,7 @@ final class ComponentDeclarations {
       delegateMultibindingContributions;
 
   private ComponentDeclarations(
+      KeyFactory keyFactory,
       ImmutableSetMultimap<Key, ContributionBinding> bindings,
       ImmutableSetMultimap<Key, DelegateDeclaration> delegates,
       ImmutableSetMultimap<Key, OptionalBindingDeclaration> optionalBindings,
@@ -60,6 +59,7 @@ final class ComponentDeclarations {
       ImmutableSetMultimap<TypeNameKey, MultibindingDeclaration> multibindings,
       ImmutableSetMultimap<TypeNameKey, ContributionBinding> multibindingContributions,
       ImmutableSetMultimap<TypeNameKey, DelegateDeclaration> delegateMultibindingContributions) {
+    this.keyFactory = keyFactory;
     this.bindings = bindings;
     this.delegates = delegates;
     this.optionalBindings = optionalBindings;
@@ -74,7 +74,16 @@ final class ComponentDeclarations {
   }
 
   ImmutableSet<DelegateDeclaration> delegates(Key key) {
-    return delegates.get(key);
+    // @Binds @IntoMap declarations have key Map<K, V> but may be requested as
+    // Map<K, Provider/Producer<V>> keys, so unwrap the multibinding map contribution key first.
+    // TODO(b/366277730): This can be simplified to "delegates.get(key)" once the flag for
+    // "useFrameworkTypeInMapMultibindingContributionKey" is removed.
+    return delegates.get(
+        key.multibindingContributionIdentifier().isPresent()
+            // TODO(bcorso): Consider using TypeNameKey here instead of Key, to avoid losing
+            // variance information when unwrapping KSP types (see TypeNameKey's javadoc).
+            ? keyFactory.unwrapMapValueType(key)
+            : key);
   }
 
   /**
@@ -169,13 +178,16 @@ final class ComponentDeclarations {
 
   static final class Factory {
     private final XProcessingEnv processingEnv;
+    private final KeyFactory keyFactory;
     private final ModuleDescriptor.Factory moduleDescriptorFactory;
 
     @Inject
     Factory(
         XProcessingEnv processingEnv,
+        KeyFactory keyFactory,
         ModuleDescriptor.Factory moduleDescriptorFactory) {
       this.processingEnv = processingEnv;
+      this.keyFactory = keyFactory;
       this.moduleDescriptorFactory = moduleDescriptorFactory;
     }
 
@@ -204,6 +216,7 @@ final class ComponentDeclarations {
       }
 
       return new ComponentDeclarations(
+          keyFactory,
           indexDeclarationsByKey(bindings.build()),
           indexDeclarationsByKey(delegates.build()),
           indexDeclarationsByKey(optionalBindings.build()),
@@ -304,14 +317,14 @@ final class ComponentDeclarations {
       return ParameterizedTypeName.get(
             mapTypeName.rawType,
             mapKeyTypeName,
-            unwrapFrameworkTypeName(mapValueTypeName, MAP_FRAMEWORK_TYPENAMES));
+            unwrapFrameworkTypeName(mapValueTypeName, FrameworkTypes.MAP_VALUE_FRAMEWORK_TYPES));
     }
     if (isValidSetMultibindingTypeName(typeName)) {
       ParameterizedTypeName setTypeName = (ParameterizedTypeName) typeName;
       TypeName setValueTypeName = getOnlyElement(setTypeName.typeArguments);
       return ParameterizedTypeName.get(
           setTypeName.rawType,
-          unwrapFrameworkTypeName(setValueTypeName, SET_FRAMEWORK_TYPENAMES));
+          unwrapFrameworkTypeName(setValueTypeName, FrameworkTypes.SET_VALUE_FRAMEWORK_TYPES));
     }
     return typeName;
   }
@@ -338,7 +351,7 @@ final class ComponentDeclarations {
   }
 
   private static TypeName unwrapFrameworkTypeName(
-      TypeName typeName, ImmutableSet<TypeName> frameworkTypeNames) {
+      TypeName typeName, ImmutableSet<ClassName> frameworkTypeNames) {
     if (typeName instanceof ParameterizedTypeName) {
       ParameterizedTypeName parameterizedTypeName = (ParameterizedTypeName) typeName;
       if (frameworkTypeNames.contains(parameterizedTypeName.rawType)) {

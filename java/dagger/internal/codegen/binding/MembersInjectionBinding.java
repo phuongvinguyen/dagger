@@ -58,8 +58,8 @@ public abstract class MembersInjectionBinding extends Binding {
   public abstract ImmutableSortedSet<InjectionSite> injectionSites();
 
   @Override
-  public BindingType bindingType() {
-    return BindingType.MEMBERS_INJECTION;
+  public Optional<BindingType> optionalBindingType() {
+    return Optional.of(BindingType.MEMBERS_INJECTION);
   }
 
   @Override

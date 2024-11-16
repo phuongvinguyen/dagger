@@ -23,6 +23,7 @@ import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.DEPRE
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.KOTLIN_INTERNAL;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.RAWTYPES;
 import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNCHECKED;
+import static dagger.internal.codegen.javapoet.AnnotationSpecs.Suppression.UNINITIALIZED;
 import static dagger.internal.codegen.xprocessing.XElements.closestEnclosingTypeElement;
 
 import androidx.room.compiler.processing.XElement;
@@ -92,7 +93,7 @@ public abstract class SourceFileGenerator<T> {
         AnnotationSpecs.suppressWarnings(
             ImmutableSet.<Suppression>builder()
                 .addAll(warningSuppressions())
-                .add(UNCHECKED, RAWTYPES, KOTLIN_INTERNAL, CAST, DEPRECATION)
+                .add(UNCHECKED, RAWTYPES, KOTLIN_INTERNAL, CAST, DEPRECATION, UNINITIALIZED)
                 .build()));
 
     String packageName = closestEnclosingTypeElement(originatingElement).getPackageName();

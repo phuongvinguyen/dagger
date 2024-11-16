@@ -21,13 +21,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static dagger.internal.codegen.base.RequestKinds.extractKeyType;
-import static dagger.internal.codegen.base.RequestKinds.frameworkClassName;
 import static dagger.internal.codegen.base.RequestKinds.getRequestKind;
 import static dagger.internal.codegen.binding.AssistedInjectionAnnotations.isAssistedParameter;
 import static dagger.internal.codegen.model.RequestKind.FUTURE;
 import static dagger.internal.codegen.model.RequestKind.INSTANCE;
 import static dagger.internal.codegen.model.RequestKind.MEMBERS_INJECTION;
-import static dagger.internal.codegen.model.RequestKind.PRODUCER;
 import static dagger.internal.codegen.model.RequestKind.PROVIDER;
 import static dagger.internal.codegen.xprocessing.XTypes.isTypeOf;
 import static dagger.internal.codegen.xprocessing.XTypes.unwrapType;
@@ -47,6 +45,7 @@ import dagger.internal.codegen.model.DaggerElement;
 import dagger.internal.codegen.model.DependencyRequest;
 import dagger.internal.codegen.model.Key;
 import dagger.internal.codegen.model.RequestKind;
+import dagger.internal.codegen.xprocessing.Nullability;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -104,21 +103,11 @@ public final class DependencyRequestFactory {
         .build();
   }
 
-  // TODO(b/28555349): support PROVIDER_OF_LAZY here too
-  private static final ImmutableSet<RequestKind> WRAPPING_MAP_VALUE_FRAMEWORK_TYPES =
-      ImmutableSet.of(PROVIDER, PRODUCER);
-
   private RequestKind multibindingContributionRequestKind(
       Key multibindingKey, ContributionBinding multibindingContribution) {
     switch (multibindingContribution.contributionType()) {
       case MAP:
-        MapType mapType = MapType.from(multibindingKey);
-        for (RequestKind kind : WRAPPING_MAP_VALUE_FRAMEWORK_TYPES) {
-          if (mapType.valuesAreTypeOf(frameworkClassName(kind))) {
-            return kind;
-          }
-        }
-        // fall through
+        return MapType.from(multibindingKey).valueRequestKind();
       case SET:
       case SET_VALUES:
         return INSTANCE;
@@ -206,15 +195,14 @@ public final class DependencyRequestFactory {
    * Returns a synthetic request for the present value of an optional binding generated from a
    * {@link dagger.BindsOptionalOf} declaration.
    */
-  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey, RequestKind kind) {
+  DependencyRequest forSyntheticPresentOptionalBinding(Key requestKey) {
     Optional<Key> key = keyFactory.unwrapOptional(requestKey);
     checkArgument(key.isPresent(), "not a request for optional: %s", requestKey);
+    RequestKind kind = getRequestKind(OptionalType.from(requestKey).valueType());
     return DependencyRequest.builder()
         .kind(kind)
         .key(key.get())
-        .isNullable(
-            requestKindImplicitlyAllowsNull(
-                getRequestKind(OptionalType.from(requestKey).valueType())))
+        .isNullable(requestKindImplicitlyAllowsNull(kind))
         .build();
   }
 

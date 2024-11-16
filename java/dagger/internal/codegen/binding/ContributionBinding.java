@@ -16,6 +16,7 @@
 
 package dagger.internal.codegen.binding;
 
+import static com.google.common.base.Preconditions.checkState;
 import static dagger.internal.codegen.xprocessing.XElements.asMethod;
 import static dagger.internal.codegen.xprocessing.XElements.isAbstract;
 import static dagger.internal.codegen.xprocessing.XElements.isStatic;
@@ -35,6 +36,7 @@ import dagger.internal.codegen.compileroption.CompilerOptions;
 import dagger.internal.codegen.model.BindingKind;
 import dagger.internal.codegen.model.Key;
 import dagger.internal.codegen.model.Scope;
+import dagger.internal.codegen.xprocessing.Nullability;
 import dagger.internal.codegen.xprocessing.XTypes;
 import java.util.Optional;
 
@@ -114,6 +116,31 @@ public abstract class ContributionBinding extends Binding implements HasContribu
   }
 
   public abstract Builder<?, ?> toBuilder();
+
+  /** Returns a new {@link ContributionBinding} with the given {@link BindingType}. */
+  final ContributionBinding withBindingType(BindingType bindingType) {
+    checkState(optionalBindingType().isEmpty());
+    switch (kind()) {
+      case DELEGATE:
+        return ((DelegateBinding) this).toBuilder()
+            .optionalBindingType(Optional.of(bindingType))
+            .build();
+      case OPTIONAL:
+        return ((OptionalBinding) this).toBuilder()
+            .optionalBindingType(Optional.of(bindingType))
+            .build();
+      case MULTIBOUND_MAP:
+        return ((MultiboundMapBinding) this).toBuilder()
+            .optionalBindingType(Optional.of(bindingType))
+            .build();
+      case MULTIBOUND_SET:
+        return ((MultiboundSetBinding) this).toBuilder()
+            .optionalBindingType(Optional.of(bindingType))
+            .build();
+      default:
+        throw new AssertionError("Unexpected binding kind: " + kind());
+    }
+  }
 
   /**
    * Base builder for {@link com.google.auto.value.AutoValue @AutoValue} subclasses of {@link

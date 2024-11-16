@@ -32,8 +32,8 @@ import dagger.internal.codegen.base.DaggerSuperficialValidation;
 import dagger.internal.codegen.base.SetType;
 import dagger.internal.codegen.binding.BindsTypeChecker;
 import dagger.internal.codegen.binding.InjectionAnnotations;
-import dagger.internal.codegen.binding.Nullability;
 import dagger.internal.codegen.javapoet.TypeNames;
+import dagger.internal.codegen.xprocessing.Nullability;
 import javax.inject.Inject;
 
 /** A validator for {@link dagger.Binds} methods. */

@@ -97,6 +97,8 @@ public final class RequestKinds {
 
   private static final ImmutableMap<RequestKind, ClassName> FRAMEWORK_CLASSES =
       ImmutableMap.of(
+          // Default to the javax Provider since that is what is used for the binding graph
+          // representation.
           PROVIDER, TypeNames.PROVIDER,
           LAZY, TypeNames.LAZY,
           PRODUCER, TypeNames.PRODUCER,
@@ -111,8 +113,13 @@ public final class RequestKinds {
       return RequestKind.INSTANCE;
     }
 
-    if (isTypeOf(type, TypeNames.PROVIDER) && isTypeOf(unwrapType(type), TypeNames.LAZY)) {
+    if ((isTypeOf(type, TypeNames.PROVIDER) || isTypeOf(type, TypeNames.JAKARTA_PROVIDER))
+        && isTypeOf(unwrapType(type), TypeNames.LAZY)) {
       return RequestKind.PROVIDER_OF_LAZY;
+    }
+
+    if (isTypeOf(type, TypeNames.JAKARTA_PROVIDER)) {
+      return RequestKind.PROVIDER;
     }
 
     return FRAMEWORK_CLASSES.keySet().stream()

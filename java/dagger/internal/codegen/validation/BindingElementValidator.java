@@ -144,7 +144,7 @@ public abstract class BindingElementValidator<E extends XElement> {
       checkType();
       checkQualifiers();
       checkMapKeys();
-      checkMultibindings();
+      checkMultibindingAnnotations();
       checkScopes();
       checkAdditionalProperties();
       return report.build();
@@ -188,8 +188,10 @@ public abstract class BindingElementValidator<E extends XElement> {
           // fall through
 
         case SET:
+          bindingElementType().ifPresent(this::checkSetValueFrameworkType);
+          break;
         case MAP:
-          bindingElementType().ifPresent(this::checkKeyType);
+          bindingElementType().ifPresent(this::checkMapValueFrameworkType);
           break;
 
         case SET_VALUES:
@@ -245,7 +247,7 @@ public abstract class BindingElementValidator<E extends XElement> {
         if (setType.isRawType()) {
           report.addError(elementsIntoSetRawSetMessage());
         } else {
-          checkKeyType(setType.elementType());
+          checkSetValueFrameworkType(setType.elementType());
         }
       }
     }
@@ -301,7 +303,7 @@ public abstract class BindingElementValidator<E extends XElement> {
      *       dagger.producers.Produces} annotation has a {@code type} parameter.
      * </ul>
      */
-    private void checkMultibindings() {
+    private void checkMultibindingAnnotations() {
       ImmutableSet<XAnnotation> multibindingAnnotations =
           XElements.getAllAnnotations(element, MULTIBINDING_ANNOTATIONS);
 
@@ -359,6 +361,23 @@ public abstract class BindingElementValidator<E extends XElement> {
     private void checkFrameworkType() {
       if (bindingElementType().filter(FrameworkTypes::isFrameworkType).isPresent()) {
         report.addError(bindingElements("must not %s framework types", bindingElementTypeVerb()));
+      }
+    }
+
+    private void checkSetValueFrameworkType(XType bindingType) {
+      checkKeyType(bindingType);
+      if (FrameworkTypes.isSetValueFrameworkType(bindingType)) {
+        report.addError(bindingElements(
+            "with @IntoSet/@ElementsIntoSet must not %s framework types",
+            bindingElementTypeVerb()));
+      }
+    }
+
+    private void checkMapValueFrameworkType(XType bindingType) {
+      checkKeyType(bindingType);
+      if (FrameworkTypes.isMapValueFrameworkType(bindingType)) {
+        report.addError(
+            bindingElements("with @IntoMap must not %s framework types", bindingElementTypeVerb()));
       }
     }
   }

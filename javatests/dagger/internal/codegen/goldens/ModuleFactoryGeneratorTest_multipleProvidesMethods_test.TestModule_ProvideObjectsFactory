@@ -4,11 +4,12 @@ import dagger.MembersInjector;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata({
@@ -26,7 +27,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class TestModule_ProvideObjectsFactory implements Factory<List<Object>> {
   private final TestModule module;
@@ -48,6 +50,12 @@ public final class TestModule_ProvideObjectsFactory implements Factory<List<Obje
   @Override
   public List<Object> get() {
     return provideObjects(module, aProvider.get(), bProvider.get(), xInjectorProvider.get());
+  }
+
+  public static TestModule_ProvideObjectsFactory create(TestModule module,
+      javax.inject.Provider<Object> aProvider, javax.inject.Provider<Object> bProvider,
+      javax.inject.Provider<MembersInjector<X>> xInjectorProvider) {
+    return new TestModule_ProvideObjectsFactory(module, Providers.asDaggerProvider(aProvider), Providers.asDaggerProvider(bProvider), Providers.asDaggerProvider(xInjectorProvider));
   }
 
   public static TestModule_ProvideObjectsFactory create(TestModule module,

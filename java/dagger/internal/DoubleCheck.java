@@ -77,10 +77,7 @@ public final class DoubleCheck<T extends @Nullable Object> implements Provider<T
   }
 
   /** Returns a {@link Provider} that caches the value from the given delegate provider. */
-  // This method is declared this way instead of "<T> Provider<T> provider(Provider<T> delegate)"
-  // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
-  public static <P extends dagger.internal.Provider<T>, T> dagger.internal.Provider<T> provider(
-      P delegate) {
+  public static <T> dagger.internal.Provider<T> provider(dagger.internal.Provider<T> delegate) {
     checkNotNull(delegate);
     if (delegate instanceof DoubleCheck) {
       /* This should be a rare case, but if we have a scoped @Binds that delegates to a scoped
@@ -101,9 +98,7 @@ public final class DoubleCheck<T extends @Nullable Object> implements Provider<T
   }
 
   /** Returns a {@link Lazy} that caches the value from the given provider. */
-  // This method is declared this way instead of "<T> Lazy<T> lazy(Provider<T> delegate)"
-  // to work around an Eclipse type inference bug: https://github.com/google/dagger/issues/949.
-  public static <P extends Provider<T>, T> Lazy<T> lazy(P provider) {
+  public static <T> Lazy<T> lazy(Provider<T> provider) {
     if (provider instanceof Lazy) {
       @SuppressWarnings("unchecked")
       final Lazy<T> lazy = (Lazy<T>) provider;

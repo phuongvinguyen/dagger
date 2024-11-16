@@ -17,6 +17,7 @@
 package dagger.internal.codegen.binding;
 
 import dagger.internal.codegen.model.DependencyRequest;
+import java.util.Optional;
 
 /**
  * An abstract type for classes representing a Dagger binding. Particularly, contains the element
@@ -25,9 +26,16 @@ import dagger.internal.codegen.model.DependencyRequest;
  * subtypes.
  */
 public abstract class Binding extends BindingDeclaration {
+  /** Returns the optional {@link BindingType}.  */
+  abstract Optional<BindingType> optionalBindingType();
 
   /** The {@link BindingType} of this binding. */
-  public abstract BindingType bindingType();
+  public final BindingType bindingType() {
+    if (optionalBindingType().isPresent()) {
+      return optionalBindingType().get();
+    }
+    throw new AssertionError("bindingType() is not set: " + this);
+  }
 
   /** The {@link FrameworkType} of this binding. */
   public final FrameworkType frameworkType() {

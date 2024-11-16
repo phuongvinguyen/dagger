@@ -2,11 +2,12 @@ package test;
 
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import java.util.List;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata
@@ -21,7 +22,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class GenericClass_Factory<A extends Number & Comparable<A>, B extends List<? extends String>, C extends List<? super String>> implements Factory<GenericClass<A, B, C>> {
   private final Provider<A> aProvider;
@@ -39,6 +41,12 @@ public final class GenericClass_Factory<A extends Number & Comparable<A>, B exte
   @Override
   public GenericClass<A, B, C> get() {
     return newInstance(aProvider.get(), bProvider.get(), cProvider.get());
+  }
+
+  public static <A extends Number & Comparable<A>, B extends List<? extends String>, C extends List<? super String>> GenericClass_Factory<A, B, C> create(
+      javax.inject.Provider<A> aProvider, javax.inject.Provider<B> bProvider,
+      javax.inject.Provider<C> cProvider) {
+    return new GenericClass_Factory<A, B, C>(Providers.asDaggerProvider(aProvider), Providers.asDaggerProvider(bProvider), Providers.asDaggerProvider(cProvider));
   }
 
   public static <A extends Number & Comparable<A>, B extends List<? extends String>, C extends List<? super String>> GenericClass_Factory<A, B, C> create(

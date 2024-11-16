@@ -84,7 +84,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
   private final XProcessingEnv processingEnv;
   private final XMessager messager;
   private final InjectValidator injectValidator;
-  private final InjectValidator injectValidatorWhenGeneratingCode;
   private final KeyFactory keyFactory;
   private final BindingFactory bindingFactory;
   private final CompilerOptions compilerOptions;
@@ -106,7 +105,7 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
         checkState(!binding.unresolved().isPresent());
         XType type = binding.key().type().xprocessing();
         if (!isDeclared(type)
-            || injectValidatorWhenGeneratingCode.validate(type.getTypeElement()).isClean()) {
+                || injectValidator.validateWhenGeneratingCode(type.getTypeElement()).isClean()) {
           generator.generate(binding);
         }
         materializedBindingKeys.add(binding.key());
@@ -223,7 +222,6 @@ final class InjectBindingRegistryImpl implements InjectBindingRegistry {
     this.processingEnv = processingEnv;
     this.messager = messager;
     this.injectValidator = injectValidator;
-    this.injectValidatorWhenGeneratingCode = injectValidator.whenGeneratingCode();
     this.keyFactory = keyFactory;
     this.bindingFactory = bindingFactory;
     this.compilerOptions = compilerOptions;

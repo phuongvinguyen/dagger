@@ -92,7 +92,7 @@ final class MembersInjectionMethods {
   }
 
   private Expression injectMethodExpression(Binding binding) {
-    // TODO(wanyingd): move Switching Providers and injection methods to Shard classes to avoid
+    // TODO(bcorso): move Switching Providers and injection methods to Shard classes to avoid
     // exceeding component class constant pool limit.
     // Add to Component Shard so that is can be accessible from Switching Providers.
     ShardImplementation shardImplementation = componentImplementation.shardImplementation(binding);

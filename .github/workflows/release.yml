@@ -10,7 +10,7 @@ on:
 env:
   USE_JAVA_DISTRIBUTION: 'zulu'
   USE_JAVA_VERSION: '11'
-  # This is required by AGP 8.3+.
+  # This is required by Gradle 8.0+.
   USE_JAVA_VERSION_FOR_PLUGIN: '17'
   DAGGER_RELEASE_VERSION: "${{ github.event.inputs.dagger_release_version }}"
   # The default Maven 3.9.0 has a regression so we manually install 3.8.7.
@@ -24,14 +24,14 @@ jobs:
     name: 'Validate Dagger version'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/prechecks
   bazel-build:
     name: 'Bazel build'
     needs: validate-latest-dagger-version
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/bazel-build
   bazel-test:
     name: 'Bazel tests'
@@ -40,28 +40,28 @@ jobs:
       group: large-runner-group
       labels: ubuntu-22.04-16core
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/bazel-test
   artifact-verification-tests:
     name: 'Artifact verification tests'
     needs: bazel-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/artifact-verification-tests
   artifact-java-local-tests:
     name: 'Artifact Java local tests'
     needs: bazel-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/artifact-java-local-tests
   test-gradle-plugin:
     name: 'Test Hilt Gradle plugin'
     needs: bazel-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/test-gradle-plugin
   artifact-android-local-tests:
     name: 'Artifact Android local tests (AGP ${{ matrix.agp }})'
@@ -70,14 +70,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - agp: '7.0.0'
-            jdk: '11'
-          - agp: '7.1.2'
-            jdk: '11'
-          - agp: '8.1.0'
+          - agp: '8.1.1'
             jdk: '17'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/artifact-android-local-tests
         with:
           agp: '${{ matrix.agp }}'
@@ -94,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 'Install Java ${{ env.USE_JAVA_VERSION }}'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: '${{ env.USE_JAVA_DISTRIBUTION }}'
           java-version: '${{ env.USE_JAVA_VERSION }}'
@@ -104,9 +100,9 @@ jobs:
           gpg-private-key: ${{ secrets.CI_GPG_PRIVATE_KEY }}
           gpg-passphrase: CI_GPG_PASSPHRASE
       - name: 'Check out repository'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: 'Cache local Maven repository'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.m2/repository
@@ -115,14 +111,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: 'Cache Bazel files'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-bazel-build-
       - name: 'Cache Gradle files'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches

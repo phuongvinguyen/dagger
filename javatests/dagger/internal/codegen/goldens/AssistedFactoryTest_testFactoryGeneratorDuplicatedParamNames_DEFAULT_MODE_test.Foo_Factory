@@ -1,10 +1,11 @@
 package test;
 
 import dagger.internal.DaggerGenerated;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata
@@ -19,7 +20,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class Foo_Factory {
   private final Provider<Bar> argProvider;
@@ -30,6 +32,10 @@ public final class Foo_Factory {
 
   public Foo get(Integer argProvider2) {
     return newInstance(argProvider.get(), argProvider2);
+  }
+
+  public static Foo_Factory create(javax.inject.Provider<Bar> argProvider) {
+    return new Foo_Factory(Providers.asDaggerProvider(argProvider));
   }
 
   public static Foo_Factory create(Provider<Bar> argProvider) {

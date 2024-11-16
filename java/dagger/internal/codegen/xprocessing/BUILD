@@ -15,7 +15,7 @@
 # Description:
 #   Import for including XProcessing in Dagger.
 
-load("@rules_java//java:defs.bzl", "java_import")
+load("@rules_java//java:defs.bzl", "java_import", "java_library")
 
 package(default_visibility = ["//:src"])
 
@@ -32,6 +32,7 @@ java_library(
         "//java/dagger/internal/codegen/extension",
         "//java/dagger/spi",
         "//third_party/java/auto:common",
+        "//third_party/java/auto:value",
         "//third_party/java/guava/base",
         "//third_party/java/guava/collect",
         "//third_party/java/javapoet",

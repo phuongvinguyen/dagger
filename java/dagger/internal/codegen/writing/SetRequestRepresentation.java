@@ -146,7 +146,7 @@ final class SetRequestRepresentation extends RequestRepresentation {
     return (!isSingleValue(dependency)
             && !isTypeAccessibleFrom(
                 binding.key().type().xprocessing(), requestingClass.packageName())
-            // TODO(wanyingd): Replace instanceof checks with validation on the binding.
+            // TODO(bcorso): Replace instanceof checks with validation on the binding.
             && (bindingExpression instanceof DerivedFromFrameworkInstanceRequestRepresentation
                 || bindingExpression instanceof DelegateRequestRepresentation))
         ? CodeBlocks.cast(expression, TypeNames.COLLECTION)

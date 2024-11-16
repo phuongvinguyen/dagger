@@ -15,7 +15,8 @@ import top1.a.b.c.d.E;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerParentComponent {
   private DaggerParentComponent() {

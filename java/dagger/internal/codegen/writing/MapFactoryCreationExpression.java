@@ -17,9 +17,9 @@
 package dagger.internal.codegen.writing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static dagger.internal.codegen.binding.MapKeys.getLazyClassMapKeyExpression;
 import static dagger.internal.codegen.binding.MapKeys.getMapKeyExpression;
 import static dagger.internal.codegen.binding.SourceFiles.mapFactoryClassName;
-import static dagger.internal.codegen.extension.DaggerCollectors.toOptional;
 
 import androidx.room.compiler.processing.XProcessingEnv;
 import com.squareup.javapoet.ClassName;
@@ -35,7 +35,6 @@ import dagger.internal.codegen.binding.MapKeys;
 import dagger.internal.codegen.binding.MultiboundMapBinding;
 import dagger.internal.codegen.javapoet.TypeNames;
 import dagger.internal.codegen.model.DependencyRequest;
-import java.util.stream.Stream;
 
 /** A factory creation expression for a multibound map. */
 final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpression {
@@ -45,7 +44,6 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
   private final BindingGraph graph;
   private final MultiboundMapBinding binding;
   private final boolean useLazyClassKey;
-  private final LazyClassKeyProviders lazyClassKeyProviders;
 
   @AssistedInject
   MapFactoryCreationExpression(
@@ -60,8 +58,6 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
     this.componentImplementation = componentImplementation;
     this.graph = graph;
     this.useLazyClassKey = MapKeys.useLazyClassKey(binding, graph);
-    this.lazyClassKeyProviders =
-        componentImplementation.shardImplementation(binding).getLazyClassKeyProviders();
   }
 
   @Override
@@ -71,15 +67,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
     TypeName valueTypeName = TypeName.OBJECT;
     if (!useRawType()) {
       MapType mapType = MapType.from(binding.key());
-      // TODO(ronshapiro): either inline this into mapFactoryClassName, or add a
-      // mapType.unwrappedValueType() method that doesn't require a framework type
-      valueTypeName =
-          Stream.of(TypeNames.PROVIDER, TypeNames.PRODUCER, TypeNames.PRODUCED)
-              .filter(mapType::valuesAreTypeOf)
-              .map(mapType::unwrappedValueType)
-              .collect(toOptional())
-              .orElseGet(mapType::valueType)
-              .getTypeName();
+      valueTypeName = mapType.unwrappedFrameworkValueType().getTypeName();
       builder.add(
           "<$T, $T>",
           useLazyClassKey ? TypeNames.STRING : mapType.keyType().getTypeName(),
@@ -93,7 +81,7 @@ final class MapFactoryCreationExpression extends MultibindingFactoryCreationExpr
       builder.add(
           ".put($L, $L)",
           useLazyClassKey
-              ? lazyClassKeyProviders.getMapKeyExpression(dependency.key())
+              ? getLazyClassMapKeyExpression(graph.contributionBinding(dependency.key()))
               : getMapKeyExpression(
                   contributionBinding, componentImplementation.name(), processingEnv),
           multibindingDependencyExpression(dependency));

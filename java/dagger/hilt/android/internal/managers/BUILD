@@ -34,7 +34,9 @@ android_library(
         "ServiceComponentManager.java",
         "ViewComponentManager.java",
     ],
-    exports = [":saved_state_handle_holder"],
+    exports = [
+        ":saved_state_handle_holder",
+    ],
     deps = [
         ":component_supplier",
         ":saved_state_handle_holder",

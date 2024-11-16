@@ -15,6 +15,8 @@
 # Description:
 #   Functional tests for Dagger
 
+load("@rules_java//java:defs.bzl", "java_library")
+
 package(default_visibility = ["//:src"])
 
 java_library(

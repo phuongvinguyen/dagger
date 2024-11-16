@@ -73,7 +73,7 @@ final class ProvisionBindingRepresentation implements BindingRepresentation {
     // be handled with simple pre-check in the graph. For example, a provider for a subcomponent
     // builder is backed with its direct instance, returning framework instance for both cases will
     // form a loop. There are also difficulties introduced by manually created framework requests.
-    // TODO(wanyingd): refactor framework instance so that we don't need to generate both direct
+    // TODO(bcorso): refactor framework instance so that we don't need to generate both direct
     // instance and framework instance representation for the same binding.
     if (compilerMode.isFastInit() && graph.topLevelBindingGraph().hasFrameworkRequest(binding)) {
       return false;

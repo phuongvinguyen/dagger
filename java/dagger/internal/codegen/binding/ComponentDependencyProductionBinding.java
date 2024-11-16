@@ -23,6 +23,8 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import dagger.internal.codegen.base.ContributionType;
 import dagger.internal.codegen.model.BindingKind;
 import dagger.internal.codegen.model.DependencyRequest;
+import dagger.internal.codegen.xprocessing.Nullability;
+import java.util.Optional;
 
 /** A binding for a {@link BindingKind#COMPONENT_PRODUCTION}. */
 @CheckReturnValue
@@ -34,8 +36,8 @@ public abstract class ComponentDependencyProductionBinding extends ContributionB
   }
 
   @Override
-  public BindingType bindingType() {
-    return BindingType.PRODUCTION;
+  public Optional<BindingType> optionalBindingType() {
+    return Optional.of(BindingType.PRODUCTION);
   }
 
   @Override

@@ -19,6 +19,7 @@ package dagger.internal.codegen;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatMethodInUnannotatedClass;
 import static dagger.internal.codegen.DaggerModuleMethodSubject.Factory.assertThatModuleMethod;
 
+import androidx.room.compiler.processing.XProcessingEnv;
 import androidx.room.compiler.processing.util.Source;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -32,9 +33,12 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class ModuleFactoryGeneratorTest {
 
-  private static final Source NULLABLE =
-        CompilerTests.javaSource(
-          "test.Nullable", "package test;", "public @interface Nullable {}");
+  private static final Source NON_TYPE_USE_NULLABLE =
+      CompilerTests.javaSource(
+          "test.Nullable", // force one-string-per-line format
+          "package test;",
+          "",
+          "public @interface Nullable {}");
 
   @Rule public GoldenFileRule goldenFileRule = new GoldenFileRule();
 
@@ -64,6 +68,12 @@ public class ModuleFactoryGeneratorTest {
   @Test
   public void providesMethodReturnsProvider() {
     assertThatModuleMethod("@Provides Provider<String> provideProvider() {}")
+        .hasError("@Provides methods must not return framework types");
+  }
+
+  @Test
+  public void providesMethodReturnsJakartaProvider() {
+    assertThatModuleMethod("@Provides jakarta.inject.Provider<String> provideProvider() {}")
         .hasError("@Provides methods must not return framework types");
   }
 
@@ -277,7 +287,8 @@ public class ModuleFactoryGeneratorTest {
             });
   }
 
-  @Test public void nullableProvides() {
+  @Test
+  public void nonTypeUseNullableProvides() {
     Source moduleFile =
         CompilerTests.javaSource(
             "test.TestModule",
@@ -290,12 +301,86 @@ public class ModuleFactoryGeneratorTest {
             "final class TestModule {",
             "  @Provides @Nullable String provideString() { return null; }",
             "}");
-    CompilerTests.daggerCompiler(moduleFile, NULLABLE)
+    CompilerTests.daggerCompiler(moduleFile, NON_TYPE_USE_NULLABLE)
         .compile(
             subject -> {
               subject.hasErrorCount(0);
               subject.generatedSource(
                   goldenFileRule.goldenSource("test/TestModule_ProvideStringFactory"));
+            });
+  }
+
+  @Test
+  public void kotlinNullableProvides() {
+    Source moduleFile =
+        CompilerTests.kotlinSource(
+            "TestModule.kt",
+            "package test",
+            "",
+            "import dagger.Module;",
+            "import dagger.Provides;",
+            "",
+            "@Module",
+            "class TestModule {",
+            "  @Provides fun provideString(): String? { return null; }",
+            "}");
+    CompilerTests.daggerCompiler(moduleFile)
+        .compile(
+            subject -> {
+              subject.hasErrorCount(0);
+              boolean isJavac = CompilerTests.backend(subject) == XProcessingEnv.Backend.JAVAC;
+              subject.generatedSource(
+                  CompilerTests.javaSource(
+                      "test.TestModule_ProvideStringFactory",
+                      "package test;",
+                      "",
+                      "import dagger.internal.DaggerGenerated;",
+                      "import dagger.internal.Factory;",
+                      "import dagger.internal.QualifierMetadata;",
+                      "import dagger.internal.ScopeMetadata;",
+                      "import javax.annotation.processing.Generated;",
+                      isJavac ? "import org.jetbrains.annotations.Nullable;\n" : "",
+                      "@ScopeMetadata",
+                      "@QualifierMetadata",
+                      "@DaggerGenerated",
+                      "@Generated(",
+                      "    value = \"dagger.internal.codegen.ComponentProcessor\",",
+                      "    comments = \"https://dagger.dev\"",
+                      ")",
+                      "@SuppressWarnings({",
+                      "    \"unchecked\",",
+                      "    \"rawtypes\",",
+                      "    \"KotlinInternal\",",
+                      "    \"KotlinInternalInJava\",",
+                      "    \"cast\",",
+                      "    \"deprecation\",",
+                      "    \"nullness:initialization.field.uninitialized\"",
+                      "})",
+                      "public final class TestModule_ProvideStringFactory implements"
+                          + " Factory<String> {",
+                      "  private final TestModule module;",
+                      "",
+                      "  public TestModule_ProvideStringFactory(TestModule module) {",
+                      "    this.module = module;",
+                      "  }",
+                      "",
+                      // TODO(b/368129744): KSP should output the @Nullable annotation after this
+                      // bug is fixed.
+                      isJavac ? "  @Override\n  @Nullable" : "  @Override",
+                      "  public String get() {",
+                      "    return provideString(module);",
+                      "  }",
+                      "",
+                      "  public static TestModule_ProvideStringFactory create(TestModule module) {",
+                      "    return new TestModule_ProvideStringFactory(module);",
+                      "  }",
+                      // TODO(b/368129744): KSP should output the @Nullable annotation after this
+                      // bug is fixed.
+                      isJavac ? "\n  @Nullable" : "",
+                      "  public static String provideString(TestModule instance) {",
+                      "    return instance.provideString();",
+                      "  }",
+                      "}"));
             });
   }
 
@@ -344,7 +429,8 @@ public class ModuleFactoryGeneratorTest {
             });
   }
 
-  @Test public void providesSetElement() {
+  @Test
+  public void providesSetElement() {
     Source moduleFile =
         CompilerTests.javaSource(
             "test.TestModule",

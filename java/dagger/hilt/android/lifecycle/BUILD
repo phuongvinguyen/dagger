@@ -15,6 +15,7 @@
 # Description:
 #   Hilt ViewModel integration.
 
+load("@rules_java//java:defs.bzl", "java_library")
 load("//tools:bazel_compat.bzl", "compat_kt_android_library")
 
 package(default_visibility = ["//:src"])

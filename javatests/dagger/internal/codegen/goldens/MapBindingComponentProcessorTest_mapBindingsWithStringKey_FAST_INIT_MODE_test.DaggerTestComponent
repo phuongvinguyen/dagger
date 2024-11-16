@@ -18,7 +18,8 @@ import javax.annotation.processing.Generated;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 final class DaggerTestComponent {
   private DaggerTestComponent() {
@@ -111,10 +112,10 @@ final class DaggerTestComponent {
           case 0: // java.util.Map<java.lang.String,javax.inject.Provider<test.Handler>> 
           return (T) ImmutableMap.<String, javax.inject.Provider<Handler>>of("Admin", testComponentImpl.provideAdminHandlerProvider, "Login", testComponentImpl.provideLoginHandlerProvider);
 
-          case 1: // java.util.Map<java.lang.String,javax.inject.Provider<test.Handler>> test.MapModuleOne#provideAdminHandler 
+          case 1: // java.util.Map<java.lang.String,test.Handler> test.MapModuleOne#provideAdminHandler 
           return (T) MapModuleOne_ProvideAdminHandlerFactory.provideAdminHandler(testComponentImpl.mapModuleOne);
 
-          case 2: // java.util.Map<java.lang.String,javax.inject.Provider<test.Handler>> test.MapModuleTwo#provideLoginHandler 
+          case 2: // java.util.Map<java.lang.String,test.Handler> test.MapModuleTwo#provideLoginHandler 
           return (T) MapModuleTwo_ProvideLoginHandlerFactory.provideLoginHandler(testComponentImpl.mapModuleTwo);
 
           default: throw new AssertionError(id);

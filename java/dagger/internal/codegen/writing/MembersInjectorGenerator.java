@@ -33,6 +33,9 @@ import static dagger.internal.codegen.javapoet.CodeBlocks.toConcatenatedCodeBloc
 import static dagger.internal.codegen.javapoet.TypeNames.membersInjectorOf;
 import static dagger.internal.codegen.javapoet.TypeNames.rawTypeName;
 import static dagger.internal.codegen.langmodel.Accessibility.isTypeAccessibleFrom;
+import static dagger.internal.codegen.writing.FactoryGenerator.hasDaggerProviderParams;
+import static dagger.internal.codegen.writing.FactoryGenerator.remapParamsToJavaxProvider;
+import static dagger.internal.codegen.writing.FactoryGenerator.wrappedParametersCodeBlock;
 import static dagger.internal.codegen.writing.GwtCompatibility.gwtIncompatibleAnnotation;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -64,6 +67,7 @@ import dagger.internal.codegen.model.DaggerAnnotation;
 import dagger.internal.codegen.model.DependencyRequest;
 import dagger.internal.codegen.model.Key;
 import dagger.internal.codegen.writing.InjectionMethods.InjectionSiteMethod;
+import java.util.List;
 import javax.inject.Inject;
 
 /**
@@ -106,7 +110,7 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
             .addSuperinterface(membersInjectorOf(binding.key().type().xprocessing().getTypeName()))
             .addFields(frameworkFields.values())
             .addMethod(constructor(frameworkFields))
-            .addMethod(createMethod(binding, frameworkFields))
+            .addMethods(createMethod(binding, frameworkFields))
             .addMethod(injectMembersMethod(binding, frameworkFields))
             .addMethods(
                 binding.injectionSites().stream()
@@ -159,22 +163,42 @@ public final class MembersInjectorGenerator extends SourceFileGenerator<MembersI
   //     @SuppressWarnings("RAW_TYPE") Provider dep3Provider) {
   //   return new MyClass_MembersInjector(dep1Provider, dep2Provider, dep3Provider);
   // }
-  private MethodSpec createMethod(
+  private ImmutableList<MethodSpec> createMethod(
       MembersInjectionBinding binding,
       ImmutableMap<DependencyRequest, FieldSpec> frameworkFields) {
-    MethodSpec constructor = constructor(frameworkFields);
+    ImmutableList.Builder<MethodSpec> methodsBuilder = ImmutableList.builder();
+    List<ParameterSpec> params = constructor(frameworkFields).parameters;
     // We use a static create method so that generated components can avoid having
     // to refer to the generic types of the factory.
     // (Otherwise they may have visibility problems referring to the types.)
+    methodsBuilder.add(methodBuilder("create")
+        .addModifiers(PUBLIC, STATIC)
+        .addTypeVariables(bindingTypeElementTypeVariableNames(binding))
+        .returns(membersInjectorOf(binding.key().type().xprocessing().getTypeName()))
+        .addParameters(params)
+        .addStatement(
+            "return new $T($L)",
+            parameterizedGeneratedTypeNameForBinding(binding),
+            parameterNames(params))
+        .build());
+    if (hasDaggerProviderParams(params)) {
+      methodsBuilder.add(javaxCreateMethod(binding, params));
+    }
+    return methodsBuilder.build();
+  }
+
+  private MethodSpec javaxCreateMethod(
+      MembersInjectionBinding binding, List<ParameterSpec> params) {
+    ImmutableList<ParameterSpec> remappedParams = remapParamsToJavaxProvider(params);
     return methodBuilder("create")
         .addModifiers(PUBLIC, STATIC)
         .addTypeVariables(bindingTypeElementTypeVariableNames(binding))
         .returns(membersInjectorOf(binding.key().type().xprocessing().getTypeName()))
-        .addParameters(constructor.parameters)
+        .addParameters(remappedParams)
         .addStatement(
             "return new $T($L)",
             parameterizedGeneratedTypeNameForBinding(binding),
-            parameterNames(constructor.parameters))
+            wrappedParametersCodeBlock(remappedParams))
         .build();
   }
 

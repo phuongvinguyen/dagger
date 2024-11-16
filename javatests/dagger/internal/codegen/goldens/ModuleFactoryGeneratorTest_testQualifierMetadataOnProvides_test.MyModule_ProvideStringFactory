@@ -3,10 +3,11 @@ package test;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.Preconditions;
+import dagger.internal.Provider;
+import dagger.internal.Providers;
 import dagger.internal.QualifierMetadata;
 import dagger.internal.ScopeMetadata;
 import javax.annotation.processing.Generated;
-import javax.inject.Provider;
 
 @ScopeMetadata
 @QualifierMetadata({
@@ -24,7 +25,8 @@ import javax.inject.Provider;
     "KotlinInternal",
     "KotlinInternalInJava",
     "cast",
-    "deprecation"
+    "deprecation",
+    "nullness:initialization.field.uninitialized"
 })
 public final class MyModule_ProvideStringFactory implements Factory<String> {
   private final Provider<Integer> iProvider;
@@ -36,6 +38,10 @@ public final class MyModule_ProvideStringFactory implements Factory<String> {
   @Override
   public String get() {
     return provideString(iProvider.get());
+  }
+
+  public static MyModule_ProvideStringFactory create(javax.inject.Provider<Integer> iProvider) {
+    return new MyModule_ProvideStringFactory(Providers.asDaggerProvider(iProvider));
   }
 
   public static MyModule_ProvideStringFactory create(Provider<Integer> iProvider) {

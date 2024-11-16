@@ -44,7 +44,7 @@ def getAdditionalTestDirs(String variant) {
 
 android {
     compileSdkVersion 33
-    buildToolsVersion "33.0.0"
+    buildToolsVersion "33.0.1"
 
     defaultConfig {
         applicationId "dagger.hilt.android.simple"
@@ -54,6 +54,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "dagger.hilt.android.simple.SimpleEmulatorTestRunner"
     }
+    namespace "dagger.hilt.android.simple"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11

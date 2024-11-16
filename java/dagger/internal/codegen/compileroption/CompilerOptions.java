@@ -21,8 +21,6 @@ import javax.tools.Diagnostic;
 
 /** A collection of options that dictate how the compiler will run. */
 public abstract class CompilerOptions {
-  public abstract boolean usesProducers();
-
   /**
    * Returns true if the fast initialization flag, {@code fastInit}, is enabled.
    *
@@ -55,15 +53,6 @@ public abstract class CompilerOptions {
    * Dagger's own processors.
    */
   public abstract boolean includeStacktraceWithDeferredErrorMessages();
-
-  /**
-   * If {@code true}, Dagger will generate factories and components even if some members-injected
-   * types have {@code private} or {@code static} {@code @Inject}-annotated members.
-   *
-   * <p>This should only ever be enabled by the TCK tests. Disabling this validation could lead to
-   * generating code that does not compile.
-   */
-  public abstract boolean ignorePrivateAndStaticInjectionForComponent();
 
   public abstract ValidationType scopeCycleValidationType();
 
@@ -128,6 +117,15 @@ public abstract class CompilerOptions {
    * This flag will be removed in a future release.
    */
   public abstract boolean generatedClassExtendsComponent();
+
+  /**
+   * Returns {@code true} if the key for map multibinding contributions contain a framework type.
+   *
+   * <p>This option is for migration purposes only, and will be removed in a future release.
+   *
+   * <p>The default value is {@code false}.
+   */
+  public abstract boolean useFrameworkTypeInMapMultibindingContributionKey();
 
   /** Returns the number of bindings allowed per shard. */
   public int keysPerComponentShard(XTypeElement component) {

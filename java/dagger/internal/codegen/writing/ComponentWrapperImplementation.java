@@ -23,6 +23,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import com.squareup.javapoet.ClassName;
@@ -34,6 +35,8 @@ import dagger.internal.codegen.binding.BindingGraph;
 import dagger.internal.codegen.writing.ComponentImplementation.FieldSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.MethodSpecKind;
 import dagger.internal.codegen.writing.ComponentImplementation.TypeSpecKind;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 
 /** Represents the implementation of the generated holder for the components. */
@@ -48,6 +51,7 @@ public final class ComponentWrapperImplementation implements GeneratedImplementa
       MultimapBuilder.enumKeys(MethodSpecKind.class).arrayListValues().build();
   private final ListMultimap<TypeSpecKind, TypeSpec> typeSpecsMap =
       MultimapBuilder.enumKeys(TypeSpecKind.class).arrayListValues().build();
+  private final List<Supplier<TypeSpec>> typeSuppliers = new ArrayList<>();
 
   @Inject
   ComponentWrapperImplementation(@TopLevel BindingGraph graph) {
@@ -81,6 +85,11 @@ public final class ComponentWrapperImplementation implements GeneratedImplementa
   }
 
   @Override
+  public void addTypeSupplier(Supplier<TypeSpec> typeSpecSupplier) {
+    typeSuppliers.add(typeSpecSupplier);
+  }
+
+  @Override
   public TypeSpec generate() {
     TypeSpec.Builder builder =
         classBuilder(getTopLevelClassName(graph.componentDescriptor())).addModifiers(FINAL);
@@ -92,6 +101,7 @@ public final class ComponentWrapperImplementation implements GeneratedImplementa
     fieldSpecsMap.asMap().values().forEach(builder::addFields);
     methodSpecsMap.asMap().values().forEach(builder::addMethods);
     typeSpecsMap.asMap().values().forEach(builder::addTypes);
+    typeSuppliers.stream().map(Supplier::get).forEach(builder::addType);
 
     return builder.addMethod(constructorBuilder().addModifiers(PRIVATE).build()).build();
   }
