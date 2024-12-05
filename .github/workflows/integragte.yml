@@ -3,4 +3,4 @@ updates:
   - package-ecosystem: "maven"      # Specify Gradle as the package ecosystem
     directory: "/"                  # Root directory of the project
     schedule:
-      interval: "daily"   
+      interval: "weekly"   
