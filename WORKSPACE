@@ -221,7 +221,7 @@ maven_install(
         "androidx.navigation:navigation-common:2.5.1",
         "androidx.navigation:navigation-fragment:2.5.1",
         "androidx.navigation:navigation-runtime:2.5.1",
-        "androidx.savedstate:savedstate:1.2.0",
+        "androidx.savedstate:savedstate:1.2.1",
         "androidx.test:monitor:1.4.0",
         "androidx.test:core:1.4.0",
         "androidx.test.ext:junit:1.1.3",
