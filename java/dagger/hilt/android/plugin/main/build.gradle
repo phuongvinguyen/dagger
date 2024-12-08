@@ -74,7 +74,7 @@ dependencies {
 
   testImplementation gradleTestKit()
   testImplementation 'junit:junit:4.12'
-  testImplementation 'com.google.truth:truth:1.0.1'
+  testImplementation 'com.google.truth:truth:1.4.4'
   testImplementation 'org.javassist:javassist:3.26.0-GA'
   testPluginCompile "com.android.tools.build:gradle:$agp_version"
   testPluginCompile "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
