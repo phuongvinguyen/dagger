@@ -73,7 +73,7 @@ dependencies {
   implementation "com.squareup:javapoet:1.13.0"
 
   testImplementation gradleTestKit()
-  testImplementation 'junit:junit:4.12'
+  testImplementation 'junit:junit:4.13.2'
   testImplementation 'com.google.truth:truth:1.0.1'
   testImplementation 'org.javassist:javassist:3.26.0-GA'
   testPluginCompile "com.android.tools.build:gradle:$agp_version"
