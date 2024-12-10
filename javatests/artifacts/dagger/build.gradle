@@ -19,7 +19,7 @@ buildscript {
     dagger_version = "LOCAL-SNAPSHOT"
     kotlin_version = "1.9.24"
     ksp_version = "$kotlin_version-1.0.20"
-    junit_version = "4.13"
+    junit_version = "4.13.2"
     truth_version = "1.0.1"
   }
 }
