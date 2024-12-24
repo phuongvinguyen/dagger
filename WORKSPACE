@@ -101,9 +101,9 @@ rules_proto_toolchains()
 
 http_archive(
     name = "rules_python",
-    sha256 = "e5470e92a18aa51830db99a4d9c492cc613761d5bdb7131c04bd92b9834380f6",
-    strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",
-    urls = ["https://github.com/bazelbuild/rules_python/archive/4b84ad270387a7c439ebdccfd530e2339601ef27.tar.gz"],
+    sha256 = "e25ac351e2c1041654b2bdfc88ac8a9add15bdf81b8b531090ff8a5bfaf0620b",
+    strip_prefix = "rules_python-922929b6b7f8e9426e4a8d29aaebada9a4d14599",
+    urls = ["https://github.com/bazelbuild/rules_python/archive/922929b6b7f8e9426e4a8d29aaebada9a4d14599.tar.gz"],
 )
 
 http_archive(
