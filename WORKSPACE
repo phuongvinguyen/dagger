@@ -242,7 +242,7 @@ maven_install(
         "com.google.auto.service:auto-service-annotations:1.0",
         "com.google.auto.value:auto-value:1.9",
         "com.google.auto.value:auto-value-annotations:1.9",
-        "com.google.code.findbugs:jsr305:3.0.1",
+        "com.google.code.findbugs:jsr305:3.0.2",
         "com.google.devtools.ksp:symbol-processing:%s" % KSP_VERSION,
         "com.google.devtools.ksp:symbol-processing-api:%s" % KSP_VERSION,
         "com.google.errorprone:error_prone_annotation:%s" % ERROR_PRONE_VERSION,
