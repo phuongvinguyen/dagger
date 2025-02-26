@@ -212,7 +212,7 @@ maven_install(
         "androidx.annotation:annotation:1.1.0",
         "androidx.annotation:annotation-experimental:1.3.1",
         "androidx.appcompat:appcompat:1.3.1",
-        "androidx.activity:activity:1.5.1",
+        "androidx.activity:activity:1.10.1",
         "androidx.fragment:fragment:1.5.1",
         "androidx.lifecycle:lifecycle-common:2.5.1",
         "androidx.lifecycle:lifecycle-viewmodel:2.5.1",
